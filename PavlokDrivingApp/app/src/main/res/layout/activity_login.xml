@@ -1,0 +1,59 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:background="@drawable/mainbackground"
+    android:layout_width="match_parent">
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:id="@+id/TFusername"
+        android:textColor="#000"
+        android:background="@drawable/group_top"
+        android:paddingLeft="5dp"
+        android:hint="Username/Email"
+        android:layout_marginTop="20dp"
+        android:maxLines="1" />
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:inputType="textPassword"
+        android:textColor="#000"
+        android:paddingLeft="5dp"
+        android:background="@drawable/group_bottom"
+        android:id="@+id/TFpassword"
+        android:hint="Password"
+        android:maxLines="1" />
+    <LinearLayout
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
+        <Button
+            android:layout_width="0dip"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Login"
+            android:id="@+id/Blogin"
+            style="@style/button"
+            android:onClick="onButtonClick"
+            android:background="@drawable/button"
+            android:layout_marginRight="5dp"/>
+        <Button
+            android:layout_width="0dip"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Sign Up"
+            style="@style/button"
+            android:id="@+id/Bsignup"
+            android:background="@drawable/button"
+            android:onClick="onButtonClick" />
+    </LinearLayout>
+</LinearLayout>
+
+
+
+
+
