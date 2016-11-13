@@ -26,10 +26,11 @@ public class LoginTask extends AsyncTask{
 
     @Override
     protected Object doInBackground(Object[] params) {
+        Connection conn = null;
         try {
             int count=0;
             Class.forName("com.mysql.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306","ateam","theateam");
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306","ateam","theateam");
             Log.i("raand",conn.toString());
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM pavlokdb.users WHERE EMAIL = '"+params[0]+"' AND PASSWORD = '"+params[1]+"'");
@@ -46,6 +47,12 @@ public class LoginTask extends AsyncTask{
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        }finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

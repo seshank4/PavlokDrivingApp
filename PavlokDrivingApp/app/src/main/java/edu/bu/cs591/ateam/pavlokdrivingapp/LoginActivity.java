@@ -1,5 +1,6 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -30,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
         final EditText password = (EditText) findViewById(R.id.etPassword);
 
         loginButton = (Button) findViewById(R.id.Blogin);
+        Button registerBtn = (Button) findViewById(R.id.signUpBtn);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -39,6 +41,14 @@ public class LoginActivity extends AppCompatActivity {
 
                 loginTask.execute(uName.getText().toString(), password.getText().toString());
 
+            }
+        });
+
+        registerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this,RegisterUserActivity.class);
+                startActivity(intent);
             }
         });
 

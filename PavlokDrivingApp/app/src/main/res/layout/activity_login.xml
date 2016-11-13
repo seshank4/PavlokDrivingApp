@@ -46,9 +46,8 @@
             android:layout_height="wrap_content"
             android:text="Sign Up"
             style="@style/button"
-            android:id="@+id/Bsignup"
-            android:background="@drawable/button"
-            android:onClick="onButtonClick" />
+            android:id="@+id/signUpBtn"
+            android:background="@drawable/button" />
     </LinearLayout>
 </LinearLayout>
 
