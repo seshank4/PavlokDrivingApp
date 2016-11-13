@@ -8,7 +8,7 @@
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="60dp"
-        android:id="@+id/TFusername"
+        android:id="@+id/etUserName"
         android:textColor="#000"
         android:background="@drawable/group_top"
         android:paddingLeft="5dp"
@@ -22,7 +22,7 @@
         android:textColor="#000"
         android:paddingLeft="5dp"
         android:background="@drawable/group_bottom"
-        android:id="@+id/TFpassword"
+        android:id="@+id/etPassword"
         android:hint="Password"
         android:maxLines="1" />
     <LinearLayout
@@ -38,7 +38,6 @@
             android:text="Login"
             android:id="@+id/Blogin"
             style="@style/button"
-            android:onClick="onButtonClick"
             android:background="@drawable/button"
             android:layout_marginRight="5dp"/>
         <Button
