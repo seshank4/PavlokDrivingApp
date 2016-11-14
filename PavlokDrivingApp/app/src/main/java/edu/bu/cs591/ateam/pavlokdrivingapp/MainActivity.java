@@ -112,9 +112,13 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "Time for an upgrade!" + ((TextView)view).getText(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Logged Out", Toast.LENGTH_SHORT).show();
 
                 if(((TextView)view).getText().toString().equals("Log Out")){
+
+                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // clear back stack
+                    startActivity(intent);
 
                 }
             }
