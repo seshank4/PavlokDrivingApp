@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.URI;
@@ -104,14 +105,18 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList = (ListView) findViewById(R.id.navList);
 
         // Set the adapter for the list view
-        String[] osArray = { "Android", "iOS", "Windows", "OS X", "Linux" };
+        String[] osArray = { "Log Out" };
         mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
         mDrawerList.setAdapter(mAdapter);
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Time for an upgrade!" + ((TextView)view).getText(), Toast.LENGTH_SHORT).show();
+
+                if(((TextView)view).getText().toString().equals("Log Out")){
+
+                }
             }
         });
 
