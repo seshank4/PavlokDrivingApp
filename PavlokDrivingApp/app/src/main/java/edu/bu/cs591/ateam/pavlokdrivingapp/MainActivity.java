@@ -30,14 +30,11 @@ public class MainActivity extends AppCompatActivity {
     private final String APP_ID = "8882d3c9f67eff55ff7b0c535d2a6ccd189d47cd7a7b42c531ad25d413baadd4";
     private final String redirectURI = "http://pavlok-bu-cs591/auth/pavlok/result";
     private String code = "";
-
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private String mActivityTitle;
-
     private ListView mDrawerList;
     private ArrayAdapter<String> mAdapter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,64 +43,42 @@ public class MainActivity extends AppCompatActivity {
         Button btn = (Button)findViewById(R.id.btnOauthTest);
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
-
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id="+APP_ID+"&redirect_uri="+redirectURI+"&response_type=code";
                 Uri uri = Uri.parse(page);
                 WebView webView = new WebView(MainActivity.this);
-
                 WebViewClient client = new WebViewClient(){
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-
-
                         String url = request.getUrl().toString();
-
                         if(url.contains("pavlok-bu-cs591/auth/pavlok/result")){
-
                             handleUri(request.getUrl());
                             return false;
                         }else {
-
                             return super.shouldOverrideUrlLoading(view, request);
                         }
                     }
                 };
                 webView.setWebViewClient(client);
-
-
                 webView.requestFocus(View.FOCUS_DOWN);
-
                 Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-
                 final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                         getWindowManager().getDefaultDisplay().getWidth(),
                         getWindowManager().getDefaultDisplay().getHeight());
-
                 //startActivity(intent);
               //  final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(300,300);
-
                 webView.loadUrl(page);
-
                 Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
                 dialog.addContentView(webView,params);
                 dialog.show();
-
             }
         });
-
-
         mDrawerList = (ListView) findViewById(R.id.navList);
-
         // Set the adapter for the list view
         String[] osArray = { "Log Out" };
         mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
@@ -113,27 +88,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MainActivity.this, "Logged Out", Toast.LENGTH_SHORT).show();
-
                 if(((TextView)view).getText().toString().equals("Log Out")){
-
                     Intent intent = new Intent(MainActivity.this,LoginActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // clear back stack
                     startActivity(intent);
-
                 }
             }
         });
-
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.string.drawer_open, R.string.drawer_close) {
-
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 getSupportActionBar().setTitle("Navigation!");
                 invalidateOptionsMenu();
             }
-
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -141,11 +110,8 @@ public class MainActivity extends AppCompatActivity {
                 invalidateOptionsMenu();
             }
         };
-
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-
     }
 
     @Override
@@ -153,33 +119,20 @@ public class MainActivity extends AppCompatActivity {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
-
     }
 
     protected void handleUri(Uri uri) {
-
             this.code  = uri.getQueryParameter("code");
-
-
             doBeep(code);
-
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
             startActivity(intent);
-
     }
 
     private String doBeep(String code) {
-
         String token = "";
-
         PavlokConnection conn = new PavlokConnection();
-
         conn.execute("beep",255,code);
-
-
-
         return token;
     }
 
