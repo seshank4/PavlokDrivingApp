@@ -46,20 +46,16 @@ public class MainActivity extends AppCompatActivity {
 
     //tomtom documentation for api:
     // http://developer.tomtom.com/products/onlinenavigation/onlinesearch/documentation/Reverse_Geocoding/ReverseGeocode
-
     //volley documentation:
     //https://developer.android.com/training/volley/simple.html
 
     //tomtom api variables setup here
     private String BASE_URL = "api.tomtom.com/";
     private int VERSION_NUMBER = 2;
-    private String POSITION = "42.35268089999999,-71.12817139999999"; // This is specified as a comma separated string composed by lat., lon.
     private String EXT = "json/"; // the extension of the response. (json, jsonp, js, or xml)
     private String API_KEY = "h8fxx4ptxbtb4y7xv5r9x7ga";
-    private Boolean RETURN_SPEED_LIMIT = true;
 
     // example string request
-
     //GET https://<baseURL>/search/<versionNumber>/reverseGeocode/<position>.<ext>?key=<apiKey>
     // [&spatialKeys=<spatialKeys>][&returnSpeedLimit=<returnSpeedLimit>][&heading=<heading>]
     // [&radius=<radius>][&streetNumber=<streetNumber>][&returnRoadUse=<returnRoadUse>]
@@ -81,10 +77,6 @@ public class MainActivity extends AppCompatActivity {
     private Boolean flag = false;
     private static final int GPS_REQUEST_CODE = 10;
 
-    String url = "https://" + BASE_URL + "search/" + VERSION_NUMBER + "/reverseGeocode/" +
-            POSITION + "." + EXT + "?key=" + API_KEY + "&returnSpeedLimit=true";
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,13 +86,9 @@ public class MainActivity extends AppCompatActivity {
         pb = (ProgressBar) findViewById(R.id.progressBar1);
         pb.setVisibility(View.INVISIBLE);
 
-        //initializing Views
-
         editLocation = (EditText) findViewById(R.id.etEditLocation);
 
         btnGetLocation = (Button) findViewById(R.id.btnGetCoordinates);
-        //btnGetLocation.setOnClickListener(this);
-
         locationMangaer = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
 
@@ -108,12 +96,7 @@ public class MainActivity extends AppCompatActivity {
         btnGetLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                flag = displayGpsStatus();
-//                if (flag)
-                //{
-
                 Log.v(TAG, "onClick");
-
                 editLocation.setText("Please!! move your device to" +
                         " see the changes in coordinates." + "\nWait..");
 
@@ -122,19 +105,9 @@ public class MainActivity extends AppCompatActivity {
 
                 if (ActivityCompat.checkSelfPermission(MainActivity.this,
                         Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-
                     ActivityCompat.requestPermissions(MainActivity.this,
                             new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                             GPS_REQUEST_CODE);
-
-                    //return;
                 }
 
                 //}
@@ -143,56 +116,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
                     locationMangaer.requestLocationUpdates(LocationManager
                             .GPS_PROVIDER, 5000, 10, locationListener);
-                    //alertbox("Gps Status!!", "Your GPS is: OFF");
                 }
             }
         });
     }
-
-
-//        //eventually move this to button onclick listener i think
-//
-//        //mTextView = (TextView) findViewById(R.id)
-//        mTextView = (TextView) findViewById(R.id.text2);
-//        RequestQueue queue = Volley.newRequestQueue(this);
-//        //String url = "https://api.github.com/gists";
-//        Log.e(TAG, url);
-//
-//        // Request a string response from the provided URL.
-//        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-//                new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                        // Display the first 500 characters of the response string.
-//
-//                        try {
-//
-//
-//                            JSONObject obj = new JSONObject(response.substring(0));
-//                            String speedLimit = obj.getJSONArray("addresses").getJSONObject(0)
-//                                    .getJSONObject("address").getString("speedLimit");
-//                            Log.e("My App", obj.toString());
-//                            Log.e("My App", obj.getJSONArray("addresses").getJSONObject(0).getJSONObject("address").getString("speedLimit"));
-//                            mTextView.setText("Response is: "+ response.substring(0)
-//                                    + "\n\n speedlimit is " + speedLimit);
-//
-//
-//                        } catch (Throwable t) {
-//                            Log.e("My App", "Could not parse malformed JSON: \"" + response.substring(0) + "\"");
-//                        }
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                mTextView.setText("That didn't work!");
-//            }
-//        });
-// Add the request to the RequestQueue.
-//        queue.add(stringRequest);
-//
-//
-//    }
-
 
     /*----Method to Check GPS is enable or disable ----- */
     private Boolean displayGpsStatus() {
@@ -266,13 +193,12 @@ public class MainActivity extends AppCompatActivity {
     private void getJsonStuff(final String latitude, final String longitude){
         //        // Request a string response from the provided URL.
         final String url2 = "https://" + BASE_URL + "search/" + VERSION_NUMBER + "/reverseGeocode/" +
-                latitude + "," + longitude + "." + EXT + "?key=" + API_KEY + "&returnSpeedLimit=true";
+                latitude + "," + longitude + "." + EXT + "?key=" + API_KEY + "&returnSpeedLimit=true"
+                + "&returnRoadUse=true" + "&roadUse=" + "[\"Arterial\"]";
 
         mTextView = (TextView) findViewById(R.id.text2);
         Log.e("My App",url2);
         Toast.makeText(MainActivity.this, "lattt and long are" + longitude + "," + latitude, Toast.LENGTH_SHORT).show();
-//        final String url2 = "https://" + BASE_URL + "search/" + VERSION_NUMBER + "/reverseGeocode/" +
-//                latitude + "," + longitude + "." + EXT + "?key=" + API_KEY + "&returnSpeedLimit=true";
         RequestQueue queue = Volley.newRequestQueue(this);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url2,
@@ -286,8 +212,6 @@ public class MainActivity extends AppCompatActivity {
                             JSONObject obj = new JSONObject(response.substring(0));
                             String speedLimit = obj.getJSONArray("addresses").getJSONObject(0)
                                     .getJSONObject("address").getString("speedLimit");
-                            Log.e("My App", "lattt and longggg are" + latitude + "," + longitude);
-                            Log.e("My App", obj.toString());
                             Log.e("My App", obj.getJSONArray("addresses").getJSONObject(0).getJSONObject("address").getString("speedLimit"));
                             mTextView.setText("Response is: "+ response.substring(0)
                                     + "\n\n speedlimit is " + speedLimit);
@@ -323,24 +247,7 @@ public class MainActivity extends AppCompatActivity {
             String latitude = "Latitude: " +loc.getLatitude();
             Log.v(TAG, latitude);
 
-    /*----------to get City-Name from coordinates ------------- */
-            String cityName=null;
-            Geocoder gcd = new Geocoder(getBaseContext(),
-                    Locale.getDefault());
-            List<Address> addresses;
-            try {
-                addresses = gcd.getFromLocation(loc.getLatitude(), loc
-                        .getLongitude(), 1);
-                if (addresses.size() > 0)
-                    System.out.println(addresses.get(0).getLocality());
-                cityName=addresses.get(0).getLocality();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-            String s = longitude+"\n"+latitude +
-                    "\n\nMy Currrent City is: "+cityName;
-            editLocation.setText(s);
             getJsonStuff(loc.getLatitude()+"", loc.getLongitude()+"");
         }
 
