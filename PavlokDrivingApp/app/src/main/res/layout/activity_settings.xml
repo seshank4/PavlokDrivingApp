@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="Settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvSettingsTitle"
+        android:textStyle="bold"
+        android:textSize="36sp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="15dp" />
+
+    <CheckBox
+        android:text="check for Strict speed enforcement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cbStrict"
+        android:layout_below="@+id/tvSettingsTitle"
+        android:layout_gravity="center_horizontal"
+        android:textSize="18sp"
+        android:layout_centerHorizontal="false"
+        android:layout_marginTop="30dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Switch
+            android:text="Manual Speed Limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/swManual"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="30dp" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spLimit"
+            android:layout_weight="4" />
+    </LinearLayout>
+
+</LinearLayout>

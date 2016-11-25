@@ -43,7 +43,8 @@
             android:text="Start Trip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/btnOauthTest" />
+            android:id="@+id/btnOauthTest"
+            android:backgroundTint="@android:color/holo_green_light" />
     </LinearLayout>
 
 </LinearLayout>
