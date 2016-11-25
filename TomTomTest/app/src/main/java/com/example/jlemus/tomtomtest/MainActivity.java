@@ -72,9 +72,6 @@ public class MainActivity extends AppCompatActivity {
     private Button btnGetLocation = null;
     private EditText editLocation = null;
     private ProgressBar pb = null;
-
-    //private static final String TAG = "Debug";
-    private Boolean flag = false;
     private static final int GPS_REQUEST_CODE = 10;
 
     @Override
@@ -92,13 +89,23 @@ public class MainActivity extends AppCompatActivity {
         locationMangaer = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
 
+        // check if GPS is enabled
+        if (locationMangaer.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            Toast.makeText(getApplicationContext(), "GPS is Enabled in your device", Toast.LENGTH_SHORT).show();
+        }else{
+            showGPSDisabledAlertToUser();
+        }
 
         btnGetLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.v(TAG, "onClick");
-                editLocation.setText("Please!! move your device to" +
-                        " see the changes in coordinates." + "\nWait..");
+
+                // check if GPS is enabled
+                if (locationMangaer.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                    Toast.makeText(getApplicationContext(), "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
+                }else{
+                    showGPSDisabledAlertToUser();
+                }
 
                 pb.setVisibility(View.VISIBLE);
 
@@ -113,82 +120,17 @@ public class MainActivity extends AppCompatActivity {
                 //}
                 else {
                     locationListener = new MyLocationListener();
-                    Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
+                    // gets the gps coords every 5 seconds and when you have moved more than 1 meter
+                    // leave at 0 for testing
                     locationMangaer.requestLocationUpdates(LocationManager
-                            .GPS_PROVIDER, 5000, 10, locationListener);
+                            .GPS_PROVIDER, 5000, 0, locationListener);
                 }
             }
         });
     }
 
-    /*----Method to Check GPS is enable or disable ----- */
-    private Boolean displayGpsStatus() {
-        ContentResolver contentResolver = getBaseContext()
-                .getContentResolver();
-        boolean gpsStatus = Settings.Secure
-                .isLocationProviderEnabled(contentResolver,
-                        LocationManager.GPS_PROVIDER);
-        if (gpsStatus) {
-            return true;
 
-        } else {
-            return false;
-        }
-    }
-
-
-    /*----------Method to create an AlertBox ------------- */
-    protected void alertbox(String title, String mymessage) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Your Device's GPS is Disable")
-                .setCancelable(false)
-                .setTitle("** Gps Status **")
-                .setPositiveButton("Gps On",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // finish the current activity
-                                // AlertBoxAdvance.this.finish();
-                                Intent myIntent = new Intent(
-                                        Settings.ACTION_SECURITY_SETTINGS);
-                                startActivity(myIntent);
-                                dialog.cancel();
-                            }
-                        })
-                .setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // cancel the dialog box
-                                dialog.cancel();
-                            }
-                        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                              int[] grantResults){
-
-        switch (requestCode) {
-            case GPS_REQUEST_CODE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
-
-    }
 
     private void getJsonStuff(final String latitude, final String longitude){
         //        // Request a string response from the provided URL.
@@ -232,22 +174,67 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void showGPSDisabledAlertToUser(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("GPS is disabled in your device. Would you like to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Goto Settings Page To Enable GPS",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                Intent callGPSSettingIntent = new Intent(
+                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(callGPSSettingIntent);
+                            }
+                        });
+        alertDialogBuilder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id){
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults){
+
+        switch (requestCode) {
+            case GPS_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+
+    }
+
+
     /*----------Listener class to get coordinates ------------- */
     private class MyLocationListener implements LocationListener {
         @Override
         public void onLocationChanged(Location loc) {
-            Toast.makeText(MainActivity.this, "In onLocationChanged", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "In onLocationChanged", Toast.LENGTH_SHORT).show();
             editLocation.setText("");
             pb.setVisibility(View.INVISIBLE);
-            Toast.makeText(getBaseContext(),"Location changed : Lat: " +
-                            loc.getLatitude()+ " Lng: " + loc.getLongitude(),
-                    Toast.LENGTH_SHORT).show();
             String longitude = "Longitude: " +loc.getLongitude();
-            Log.v(TAG, longitude);
+            Log.d(TAG, longitude);
             String latitude = "Latitude: " +loc.getLatitude();
-            Log.v(TAG, latitude);
-
-
+            Log.d(TAG, latitude);
             getJsonStuff(loc.getLatitude()+"", loc.getLongitude()+"");
         }
 
