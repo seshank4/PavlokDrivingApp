@@ -7,7 +7,7 @@
 
     <string name="action_settings">Settings</string>
 
-    <interger-array name="speed_limits">
+    <!--<interger-array name="speed_limits">
         <item>0</item>
         <item>5</item>
         <item>10</item>
@@ -27,5 +27,5 @@
         <item>80</item>
         <item>85</item>
         <item>90</item>
-    </interger-array>
+    </interger-array>-->
 </resources>

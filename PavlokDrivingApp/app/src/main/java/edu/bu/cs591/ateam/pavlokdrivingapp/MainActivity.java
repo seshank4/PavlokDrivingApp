@@ -35,20 +35,49 @@ public class MainActivity extends AppCompatActivity {
     private String mActivityTitle;
     private ListView mDrawerList;
     private ArrayAdapter<String> mAdapter;
+    public int disableStart = View.VISIBLE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button btn = (Button)findViewById(R.id.btnOauthTest);
+        final Button btn = (Button)findViewById(R.id.btnOauthTest);
+        final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle != null) {
+            if (View.VISIBLE == bundle.getInt("startBtnVisibility") || View.INVISIBLE == bundle.getInt("startBtnVisibility")) {
+
+                disableStart = bundle.getInt("startBtnVisibility");
+                if(disableStart == View.INVISIBLE){
+                    btn.setVisibility(View.INVISIBLE);
+                    stopBtn.setVisibility(View.VISIBLE);
+                }else{
+                    btn.setVisibility(View.VISIBLE);
+                    stopBtn.setVisibility(View.INVISIBLE);
+                }
+
+            }
+        }
+
+
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
+        final SpeedCheckTask task = new SpeedCheckTask();
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                btn.setVisibility(disableStart);
+                if(disableStart == View.VISIBLE) {
+                    stopBtn.setVisibility(View.VISIBLE);
+                }else{
+                    stopBtn.setVisibility(View.INVISIBLE);
+                }
+                task.execute();
                 String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id="+APP_ID+"&redirect_uri="+redirectURI+"&response_type=code";
                 Uri uri = Uri.parse(page);
                 WebView webView = new WebView(MainActivity.this);
@@ -76,6 +105,15 @@ public class MainActivity extends AppCompatActivity {
                 Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
                 dialog.addContentView(webView,params);
                 dialog.show();
+            }
+        });
+
+        stopBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                task.stopTrip = true;
+                btn.setVisibility(View.VISIBLE);
+                stopBtn.setVisibility(View.INVISIBLE);
             }
         });
         mDrawerList = (ListView) findViewById(R.id.navList);
@@ -126,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
             this.code  = uri.getQueryParameter("code");
             doBeep(code);
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
+            intent.putExtra("startBtnVisibility",View.INVISIBLE);
             startActivity(intent);
     }
 
