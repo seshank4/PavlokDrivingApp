@@ -235,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, longitude);
             String latitude = "Latitude: " +loc.getLatitude();
             Log.d(TAG, latitude);
+
             getJsonStuff(loc.getLatitude()+"", loc.getLongitude()+"");
         }
 
