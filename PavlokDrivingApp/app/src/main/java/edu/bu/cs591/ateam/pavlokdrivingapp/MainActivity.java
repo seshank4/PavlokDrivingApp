@@ -93,6 +93,17 @@ public class MainActivity extends AppCompatActivity {
                             return super.shouldOverrideUrlLoading(view, request);
                         }
                     }
+
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                        if(url.contains("pavlok-bu-cs591/auth/pavlok/result")){
+                            handleUri(Uri.parse(url));
+                            return false;
+                        }else {
+                            return super.shouldOverrideUrlLoading(view, url);
+                        }
+                    }
                 };
                 webView.setWebViewClient(client);
                 webView.requestFocus(View.FOCUS_DOWN);
@@ -112,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         stopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                task.stopTrip = true;
+                SpeedCheckTask.stopTrip = true;
                 btn.setVisibility(View.VISIBLE);
                 stopBtn.setVisibility(View.INVISIBLE);
             }
