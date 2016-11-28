@@ -2,11 +2,14 @@ package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -29,7 +32,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,12 +53,44 @@ public class MainActivity extends AppCompatActivity {
     public int disableStart = View.VISIBLE;
     private static final int GPS_REQUEST_CODE = 10;
 
+    //Tomtom
+    private LocationManager locationManager;
+    private LocationListener locationListener = null;
+
     private Button btnTomTom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Tomtom start
+
+        locationManager = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    GPS_REQUEST_CODE);
+        }
+
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }
+        //if permissions have already been granted, grab a reference to the class defined
+        // MyLocationListener
+        else {
+            locationListener = new MyLocationListener();
+
+            // gets the gps coords every 5 seconds and when you have moved more than 1 meter
+            // leave at 0 for testing
+            Log.e("calling requestlocation", "calling requestlocation");
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
+        }
+
+        //Tomtom end
+
         final Button btn = (Button)findViewById(R.id.btnOauthTest);
         final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
         btnTomTom = (Button) findViewById(R.id.btnTomTom);
@@ -76,12 +117,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
-        final SpeedCheckTask task = new SpeedCheckTask(getApplicationContext());
-
-
-
-
-
             // testing the tomtom button
             //btnTomTom is the tomtom button on the main screen
             btnTomTom.setOnClickListener(new View.OnClickListener() {
@@ -94,17 +129,15 @@ public class MainActivity extends AppCompatActivity {
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 GPS_REQUEST_CODE);
                     }
-                    task.getSpeedLimit();
+                   // task.getSpeedLimit();
                 }
             });
 
-
+            final String authCode =this.code;
             btn.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-
-
                     //runtime permissions check
                     if (ActivityCompat.checkSelfPermission(MainActivity.this,
                             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -112,15 +145,12 @@ public class MainActivity extends AppCompatActivity {
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 GPS_REQUEST_CODE);
                     }
-
-
                     btn.setVisibility(disableStart);
                     if (disableStart == View.VISIBLE) {
                         stopBtn.setVisibility(View.VISIBLE);
                     } else {
                         stopBtn.setVisibility(View.INVISIBLE);
                     }
-                    task.execute();
                     String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
                     Uri uri = Uri.parse(page);
                     WebView webView = new WebView(MainActivity.this);
@@ -159,10 +189,8 @@ public class MainActivity extends AppCompatActivity {
                     Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
                     dialog.addContentView(webView, params);
                     dialog.show();
-
                 }
             });
-
             stopBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -262,7 +290,9 @@ public class MainActivity extends AppCompatActivity {
 
     protected void handleUri(Uri uri) {
             this.code  = uri.getQueryParameter("code");
-            doBeep(code);
+            //doBeep(code);
+            SpeedCheckTask task = new SpeedCheckTask(this.code);
+            task.execute();
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
             intent.putExtra("startBtnVisibility",View.INVISIBLE);
             startActivity(intent);
@@ -286,4 +316,6 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
+
+
 }
