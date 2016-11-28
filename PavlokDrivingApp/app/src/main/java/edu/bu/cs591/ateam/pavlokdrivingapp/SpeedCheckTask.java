@@ -13,9 +13,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -105,8 +108,110 @@ public class SpeedCheckTask extends AsyncTask {
     private void doBeep() {
         PavlokConnection conn = new PavlokConnection();
         if(this.code!=null && this.code!="") {
-            conn.execute("beep", 255, this.code);
+           // conn.execute("beep", 255, );
+            String token = authorizeAndGetToken(code);
+            try {
+                doAction(token, "beep", 255);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private String authorizeAndGetToken(String code) {
+        URL url = null;
+        try {
+            url = new URL("http://pavlok-mvp.herokuapp.com/oauth/token");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        HttpURLConnection connection = null;
+
+        connection = getHttpURLConnection(url, connection);
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("client_id", "8882d3c9f67eff55ff7b0c535d2a6ccd189d47cd7a7b42c531ad25d413baadd4");
+            obj.put("client_secret", "07eaa8a1d37b2cfb029d910d467af98ee1d90daf685a477cadf2069ec00add4f");
+            obj.put("code", code);
+            obj.put("grant_type", "authorization_code");
+            obj.put("redirect_uri","http://pavlok-bu-cs591/auth/pavlok/result");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        DataOutputStream printout = null;
+        DataInputStream input;
+
+        try {
+            printout = new DataOutputStream(connection.getOutputStream());
+            printout.write(obj.toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        ObjectMapper mapper = new ObjectMapper();
+        Authorized responseObj = null;
+        try {
+            System.out.println(connection.getResponseCode());
+            responseObj = mapper.readValue(connection.getInputStream(), Authorized.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if(responseObj !=null){
+            return responseObj.getAccess_token();
+        }
+        return "";
+    }
+
+    public void doAction(String access_token, String action, int intensity) throws IOException {
+
+        URL url = new URL("http://pavlok-mvp.herokuapp.com/api/v1/stimuli/"+action+"/"+intensity);
+
+        HttpURLConnection connection = null;
+
+        connection = getHttpURLConnection(url, connection);
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("access_token", access_token);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        DataOutputStream printout = null;
+        DataInputStream input;
+
+        try {
+            printout = new DataOutputStream(connection.getOutputStream());
+            printout.write(obj.toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(connection.getResponseCode());
+
+    }
+
+    @NonNull
+    private HttpURLConnection getHttpURLConnection(URL url, HttpURLConnection connection) {
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        connection.setDoInput(true);
+        connection.setDoOutput(true);
+        try {
+            connection.connect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return connection;
     }
 
 }
