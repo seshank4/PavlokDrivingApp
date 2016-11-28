@@ -11,9 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Created by karun on 11/13/2016.
- */
 public class RegisterTask extends AsyncTask {
 
     Activity activity = null;

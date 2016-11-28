@@ -7,7 +7,18 @@
 
     <string name="action_settings">Settings</string>
 
-<array name="speed_limits">
+    <string-array name="trips">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <array name="speed_limits">
         <item>0</item>
         <item>5</item>
         <item>10</item>
@@ -27,6 +38,6 @@
         <item>80</item>
         <item>85</item>
         <item>90</item>
-
     </array>
+    <string name="title_activity_trip_summary">Map</string>
 </resources>

@@ -32,12 +32,10 @@
     </LinearLayout>
 
 
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
         <Button
             android:text="Start Trip"
@@ -54,6 +52,23 @@
             android:backgroundTint="@android:color/holo_red_light"
             android:textSize="24sp"
             android:visibility="invisible" />
+
+        <Button
+            android:text="Summary(temp)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnSummary" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/lvTrips" />
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -34,10 +34,10 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    testCompile 'junit:junit:4.12'
-    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.1'
-    compile 'com.android.support:appcompat-v7:24.2.1'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
-
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.1'
+    compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.google.android.gms:play-services-maps:8.4.0'
+    testCompile 'junit:junit:4.12'
 }

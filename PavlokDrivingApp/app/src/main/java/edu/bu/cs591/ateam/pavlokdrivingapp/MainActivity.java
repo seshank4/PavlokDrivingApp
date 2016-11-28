@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebResourceRequest;
@@ -23,8 +21,6 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.net.URI;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final Button btn = (Button)findViewById(R.id.btnOauthTest);
         final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
+        Button summary = (Button)findViewById(R.id.btnSummary);
+
 
         Bundle bundle = getIntent().getExtras();
         if(bundle != null) {
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 };
                 webView.setWebViewClient(client);
                 webView.requestFocus(View.FOCUS_DOWN);
-                Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+                Intent intent = new Intent("");
                 final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                         getWindowManager().getDefaultDisplay().getWidth(),
                         getWindowManager().getDefaultDisplay().getHeight());
@@ -106,6 +104,14 @@ public class MainActivity extends AppCompatActivity {
                 Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
                 dialog.addContentView(webView,params);
                 dialog.show();
+            }
+        });
+
+        summary.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, TripSummary.class);
+                startActivity(intent);
             }
         });
 

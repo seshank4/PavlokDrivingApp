@@ -3,9 +3,6 @@ package edu.bu.cs591.ateam.pavlokdrivingapp;
 import android.os.AsyncTask;
 import android.util.Log;
 
-/**
- * Created by sesha on 11/26/2016.
- */
 
 public class SpeedCheckTask extends AsyncTask {
 
