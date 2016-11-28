@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
-        final SpeedCheckTask task = new SpeedCheckTask(this.code);
+        final SpeedCheckTask task = new SpeedCheckTask();
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
