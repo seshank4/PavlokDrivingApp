@@ -78,7 +78,10 @@ public class PavlokConnection extends AsyncTask {
             e.printStackTrace();
         }
 
-        return responseObj.getAccess_token();
+        if(responseObj !=null){
+            return responseObj.getAccess_token();
+        }
+        return "";
     }
 
     @NonNull

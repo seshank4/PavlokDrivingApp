@@ -17,6 +17,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="edu.bu.cs591.ateam.pavlokdrivingapp.MainActivity">
 
+    <Button
+        android:id="@+id/btnTomTom"
+        android:text="TomTom Test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"

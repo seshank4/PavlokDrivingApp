@@ -40,7 +40,6 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    //final TextView mTextView; = (TextView) findViewById(R.id.text);
     private TextView mTextView;
     private String TAG = "tag_tom";
 
@@ -66,6 +65,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     //google maps api stuff set here
+
+
+    //LocationManager is a class that provides access to the system location services.
+    // These services will allow our app to get access to gps coordinates and to do any other
+    // location related events that we meay need.
     private LocationManager locationMangaer = null;
     private LocationListener locationListener = null;
 
@@ -86,12 +90,15 @@ public class MainActivity extends AppCompatActivity {
         editLocation = (EditText) findViewById(R.id.etEditLocation);
 
         btnGetLocation = (Button) findViewById(R.id.btnGetCoordinates);
+
+        //location manager is not instatiated directly. A reference to it can only be accessed
+        //by using the getSystemService(Context.LOCATION_SERVICE) call
         locationMangaer = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
 
-        // check if GPS is enabled
+        // check if GPS is enabled using location manager
         if (locationMangaer.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            Toast.makeText(getApplicationContext(), "GPS is Enabled in your device", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "GPS is Enabled in your device", Toast.LENGTH_SHORT).show();
         }else{
             showGPSDisabledAlertToUser();
         }
@@ -102,29 +109,31 @@ public class MainActivity extends AppCompatActivity {
 
                 // check if GPS is enabled
                 if (locationMangaer.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                    Toast.makeText(getApplicationContext(), "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "GPS is Enabled in your devide", Toast.LENGTH_SHORT).show();
                 }else{
                     showGPSDisabledAlertToUser();
                 }
 
+                // make the progress bar visible
                 pb.setVisibility(View.VISIBLE);
 
-
+                //runtime permissions check for gps
                 if (ActivityCompat.checkSelfPermission(MainActivity.this,
                         Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this,
                             new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                             GPS_REQUEST_CODE);
                 }
-
-                //}
+                //if permissions have already been granted, grab a reference to the class defined
+                // MyLocationListener
                 else {
                     locationListener = new MyLocationListener();
-                    //Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
+
                     // gets the gps coords every 5 seconds and when you have moved more than 1 meter
                     // leave at 0 for testing
+                    Log.e("calling requestlocation", "calling requestlocation");
                     locationMangaer.requestLocationUpdates(LocationManager
-                            .GPS_PROVIDER, 5000, 0, locationListener);
+                            .GPS_PROVIDER, 10000, 0, locationListener);
                 }
             }
         });
@@ -140,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
 
         mTextView = (TextView) findViewById(R.id.text2);
         Log.e("My App",url2);
-        Toast.makeText(MainActivity.this, "lattt and long are" + longitude + "," + latitude, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this, "lattt and long are" + longitude + "," + latitude, Toast.LENGTH_SHORT).show();
         RequestQueue queue = Volley.newRequestQueue(this);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url2,
@@ -197,17 +206,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    //overridden function that requests permission from the user for any android service/functionality
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults){
 
         switch (requestCode) {
             case GPS_REQUEST_CODE: {
-                // If request is cancelled, the result arrays are empty.
+                // If user grants the app access, we can use the requested service.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
 
                 } else {
 
@@ -225,16 +234,18 @@ public class MainActivity extends AppCompatActivity {
 
 
     /*----------Listener class to get coordinates ------------- */
+    //Implementing the LocationListener interface
     private class MyLocationListener implements LocationListener {
         @Override
         public void onLocationChanged(Location loc) {
-            Toast.makeText(MainActivity.this, "In onLocationChanged", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Requesting location update", Toast.LENGTH_SHORT).show();
             editLocation.setText("");
             pb.setVisibility(View.INVISIBLE);
             String longitude = "Longitude: " +loc.getLongitude();
             Log.d(TAG, longitude);
             String latitude = "Latitude: " +loc.getLatitude();
             Log.d(TAG, latitude);
+
 
             getJsonStuff(loc.getLatitude()+"", loc.getLongitude()+"");
         }
