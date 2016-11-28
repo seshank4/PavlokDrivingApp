@@ -1,14 +1,19 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private ListView mDrawerList;
     private ArrayAdapter<String> mAdapter;
     public int disableStart = View.VISIBLE;
+    private static final int GPS_REQUEST_CODE = 10;
+
+    private Button btnTomTom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final Button btn = (Button)findViewById(R.id.btnOauthTest);
         final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
+        btnTomTom = (Button) findViewById(R.id.btnTomTom);
 
         Bundle bundle = getIntent().getExtras();
         if(bundle != null) {
@@ -67,106 +76,174 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
-        final SpeedCheckTask task = new SpeedCheckTask();
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        final SpeedCheckTask task = new SpeedCheckTask(getApplicationContext());
 
-                btn.setVisibility(disableStart);
-                if(disableStart == View.VISIBLE) {
-                    stopBtn.setVisibility(View.VISIBLE);
-                }else{
+
+
+
+
+            // testing the tomtom button
+            //btnTomTom is the tomtom button on the main screen
+            btnTomTom.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //runtime permissions check
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                GPS_REQUEST_CODE);
+                    }
+                    task.getSpeedLimit();
+                }
+            });
+
+
+            btn.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+
+
+                    //runtime permissions check
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                GPS_REQUEST_CODE);
+                    }
+
+
+                    btn.setVisibility(disableStart);
+                    if (disableStart == View.VISIBLE) {
+                        stopBtn.setVisibility(View.VISIBLE);
+                    } else {
+                        stopBtn.setVisibility(View.INVISIBLE);
+                    }
+                    task.execute();
+                    String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
+                    Uri uri = Uri.parse(page);
+                    WebView webView = new WebView(MainActivity.this);
+                    WebViewClient client = new WebViewClient() {
+                        @Override
+                        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                            String url = request.getUrl().toString();
+                            if (url.contains("pavlok-bu-cs591/auth/pavlok/result")) {
+                                handleUri(request.getUrl());
+                                return false;
+                            } else {
+                                return super.shouldOverrideUrlLoading(view, request);
+                            }
+                        }
+
+                        @Override
+                        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                            if (url.contains("pavlok-bu-cs591/auth/pavlok/result")) {
+                                handleUri(Uri.parse(url));
+                                return false;
+                            } else {
+                                return super.shouldOverrideUrlLoading(view, url);
+                            }
+                        }
+                    };
+                    webView.setWebViewClient(client);
+                    webView.requestFocus(View.FOCUS_DOWN);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                            getWindowManager().getDefaultDisplay().getWidth(),
+                            getWindowManager().getDefaultDisplay().getHeight());
+                    //startActivity(intent);
+                    //  final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(300,300);
+                    webView.loadUrl(page);
+                    Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                    dialog.addContentView(webView, params);
+                    dialog.show();
+
+                }
+            });
+
+            stopBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SpeedCheckTask.stopTrip = true;
+                    btn.setVisibility(View.VISIBLE);
                     stopBtn.setVisibility(View.INVISIBLE);
+
                 }
-                task.execute();
-                String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id="+APP_ID+"&redirect_uri="+redirectURI+"&response_type=code";
-                Uri uri = Uri.parse(page);
-                WebView webView = new WebView(MainActivity.this);
-                WebViewClient client = new WebViewClient(){
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                        String url = request.getUrl().toString();
-                        if(url.contains("pavlok-bu-cs591/auth/pavlok/result")){
-                            handleUri(request.getUrl());
-                            return false;
-                        }else {
-                            return super.shouldOverrideUrlLoading(view, request);
-                        }
+            });
+            mDrawerList = (ListView) findViewById(R.id.navList);
+            // Set the adapter for the list view
+            String[] osArray = {"Log Out"};
+            mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+            mDrawerList.setAdapter(mAdapter);
+            // Set the list's click listener
+            mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(MainActivity.this, "Logged Out", Toast.LENGTH_SHORT).show();
+                    if (((TextView) view).getText().toString().equals("Log Out")) {
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // clear back stack
+                        startActivity(intent);
                     }
-
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-                        if(url.contains("pavlok-bu-cs591/auth/pavlok/result")){
-                            handleUri(Uri.parse(url));
-                            return false;
-                        }else {
-                            return super.shouldOverrideUrlLoading(view, url);
-                        }
-                    }
-                };
-                webView.setWebViewClient(client);
-                webView.requestFocus(View.FOCUS_DOWN);
-                Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-                final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                        getWindowManager().getDefaultDisplay().getWidth(),
-                        getWindowManager().getDefaultDisplay().getHeight());
-                //startActivity(intent);
-              //  final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(300,300);
-                webView.loadUrl(page);
-                Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-                dialog.addContentView(webView,params);
-                dialog.show();
-            }
-        });
-
-        stopBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SpeedCheckTask.stopTrip = true;
-                btn.setVisibility(View.VISIBLE);
-                stopBtn.setVisibility(View.INVISIBLE);
-            }
-        });
-        mDrawerList = (ListView) findViewById(R.id.navList);
-        // Set the adapter for the list view
-        String[] osArray = { "Log Out" };
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
-        mDrawerList.setAdapter(mAdapter);
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "Logged Out", Toast.LENGTH_SHORT).show();
-                if(((TextView)view).getText().toString().equals("Log Out")){
-                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // clear back stack
-                    startActivity(intent);
+                    //                else {
+                    //                    Intent intent = new Intent(MainActivity.this, );
+                    //                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    //                    startActivity(intent);
+                    //                }
                 }
-//                else {
-//                    Intent intent = new Intent(MainActivity.this, );
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    startActivity(intent);
-//                }
+            });
+            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                    R.string.drawer_open, R.string.drawer_close) {
+                /**
+                 * Called when a drawer has settled in a completely open state.
+                 */
+                public void onDrawerOpened(View drawerView) {
+                    super.onDrawerOpened(drawerView);
+                    getSupportActionBar().setTitle("Navigation!");
+                    invalidateOptionsMenu();
+                }
+
+                /**
+                 * Called when a drawer has settled in a completely closed state.
+                 */
+                public void onDrawerClosed(View view) {
+                    super.onDrawerClosed(view);
+                    getSupportActionBar().setTitle(mActivityTitle);
+                    invalidateOptionsMenu();
+                }
+            };
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
+            mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults){
+
+        switch (requestCode) {
+            case GPS_REQUEST_CODE: {
+                // If user grants the app access, we can use the requested service.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //Toast.makeText(MainActivity.this, "in else activity granted", Toast.LENGTH_LONG).show();
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
             }
-        });
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.string.drawer_open, R.string.drawer_close) {
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getSupportActionBar().setTitle("Navigation!");
-                invalidateOptionsMenu();
-            }
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mActivityTitle);
-                invalidateOptionsMenu();
-            }
-        };
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+
     }
 
 //    @Override
