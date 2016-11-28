@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -24,8 +23,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.List;
 
 /**
  *  various pieces of code taken from previous homework assignments
@@ -61,7 +58,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     private LocationListener ll;
 
     TextView tvTitle;
-    Button btnStupid;
+    Button btnReload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +67,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         Log.i(MYTAG, "onCreate Called.");
 
         tvTitle = (TextView)findViewById(R.id.tvTitle);
-        btnStupid = (Button)findViewById(R.id.btnStupid);
+        btnReload = (Button)findViewById(R.id.btnReload);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         ll = new MyLocationListener();
 
@@ -79,7 +76,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        btnStupid.setOnClickListener(new View.OnClickListener() {
+        btnReload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
