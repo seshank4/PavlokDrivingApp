@@ -55,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
     //Tomtom
     private LocationManager locationManager;
-    private LocationListener locationListener = null;
+    private LocationListener locationListener = new MyLocationListener();
+
 
     private Button btnTomTom;
 
@@ -74,20 +75,20 @@ public class MainActivity extends AppCompatActivity {
                     GPS_REQUEST_CODE);
         }
 
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-        }
-        //if permissions have already been granted, grab a reference to the class defined
-        // MyLocationListener
-        else {
-            locationListener = new MyLocationListener();
-
-            // gets the gps coords every 5 seconds and when you have moved more than 1 meter
-            // leave at 0 for testing
-            Log.e("calling requestlocation", "calling requestlocation");
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
-        }
+//        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+//                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//
+//        }
+//        //if permissions have already been granted, grab a reference to the class defined
+//        // MyLocationListener
+//        else {
+//            locationListener = new MyLocationListener();
+//
+//            // gets the gps coords every 5 seconds and when you have moved more than 1 meter
+//            // leave at 0 for testing
+//            Log.e("calling requestlocation", "calling requestlocation");
+//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
+//        }
 
         //Tomtom end
 
@@ -116,35 +117,17 @@ public class MainActivity extends AppCompatActivity {
         mActivityTitle = getTitle().toString();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
-            // testing the tomtom button
-            //btnTomTom is the tomtom button on the main screen
-            btnTomTom.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //runtime permissions check
-                    if (ActivityCompat.checkSelfPermission(MainActivity.this,
-                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                GPS_REQUEST_CODE);
-                    }
-                   // task.getSpeedLimit();
-                }
-            });
+
+
 
             final String authCode =this.code;
             btn.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    //runtime permissions check
-                    if (ActivityCompat.checkSelfPermission(MainActivity.this,
-                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                GPS_REQUEST_CODE);
-                    }
+
                     btn.setVisibility(disableStart);
                     if (disableStart == View.VISIBLE) {
                         stopBtn.setVisibility(View.VISIBLE);
@@ -189,6 +172,23 @@ public class MainActivity extends AppCompatActivity {
                     Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
                     dialog.addContentView(webView, params);
                     dialog.show();
+
+
+
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    }
+                    //if permissions have already been granted, grab a reference to the class defined
+                    // MyLocationListener
+                    else {
+
+
+                        // gets the gps coords every 5 seconds and when you have moved more than 1 meter
+                        // leave at 0 for testing
+                        Log.e("calling requestlocation", "calling requestlocation in oncreate");
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
+                    }
                 }
             });
             stopBtn.setOnClickListener(new View.OnClickListener() {
@@ -197,6 +197,18 @@ public class MainActivity extends AppCompatActivity {
                     SpeedCheckTask.stopTrip = true;
                     btn.setVisibility(View.VISIBLE);
                     stopBtn.setVisibility(View.INVISIBLE);
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                GPS_REQUEST_CODE);
+                    }
+
+                    else {
+                        locationManager.removeUpdates(locationListener);
+                        Log.d("location", "removed updates successfulyy");
+                    }
+
 
                 }
             });
