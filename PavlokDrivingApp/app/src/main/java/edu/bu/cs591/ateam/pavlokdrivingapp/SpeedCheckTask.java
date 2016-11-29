@@ -21,6 +21,7 @@ public class SpeedCheckTask extends AsyncTask {
     public static int speedLimit;
     public static String token = "";
     private  String code;
+    public static int vehicleSpeed;
 
 
     public SpeedCheckTask(String code){
@@ -68,7 +69,7 @@ public class SpeedCheckTask extends AsyncTask {
 
     private boolean isSpeedIllegal(double speed) {
 
-        if(speed>speedLimit){
+        if(vehicleSpeed>speedLimit){
             return true;
         }
         return false;

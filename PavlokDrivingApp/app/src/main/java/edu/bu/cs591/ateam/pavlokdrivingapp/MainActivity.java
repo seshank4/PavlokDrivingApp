@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         locationManager = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener();
+        vehicleSpeedLL = new myVehicleSpeedLL();
         if (ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this,
@@ -161,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
                         // leave at 0 for testing
                         Log.e("calling requestlocation", "calling requestlocation");
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, vehicleSpeedLL);
                     }
                 }
             });
@@ -288,5 +291,28 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    class myVehicleSpeedLL implements LocationListener{
+
+        @Override
+        public void onLocationChanged(Location location) {
+            SpeedCheckTask.vehicleSpeed = (int) location.getSpeed();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
     }
 }
