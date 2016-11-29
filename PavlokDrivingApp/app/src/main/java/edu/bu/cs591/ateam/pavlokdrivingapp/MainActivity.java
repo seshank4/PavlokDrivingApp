@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         locationManager = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new MyLocationListener();
         if (ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this,
@@ -156,8 +157,6 @@ public class MainActivity extends AppCompatActivity {
                     //if permissions have already been granted, grab a reference to the class defined
                     // MyLocationListener
                     else {
-                        locationListener = new MyLocationListener();
-
                         // gets the gps coords every 5 seconds and when you have moved more than 1 meter
                         // leave at 0 for testing
                         Log.e("calling requestlocation", "calling requestlocation");
