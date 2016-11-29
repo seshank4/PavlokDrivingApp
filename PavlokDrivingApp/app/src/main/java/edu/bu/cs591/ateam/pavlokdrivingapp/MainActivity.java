@@ -82,25 +82,56 @@ public class MainActivity extends AppCompatActivity {
 
         Button summary = (Button)findViewById(R.id.btnSummary);
         Bundle bundle = getIntent().getExtras();
-
+        boolean isRedirect = false;
         if(bundle != null) {
-            if (View.VISIBLE == bundle.getInt("startBtnVisibility") || View.INVISIBLE == bundle.getInt("startBtnVisibility")) {
-
-                disableStart = bundle.getInt("startBtnVisibility");
-                if(disableStart == View.INVISIBLE){
-                    btn.setVisibility(View.INVISIBLE);
-                    stopBtn.setVisibility(View.VISIBLE);
-                }else{
-                    btn.setVisibility(View.VISIBLE);
-                    stopBtn.setVisibility(View.INVISIBLE);
-                }
-            }
+            isRedirect = bundle.getBoolean("isRedirect");
+            this.code = bundle.getString("code");
         }
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        if(!isRedirect) {
+            String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
+            Uri uri = Uri.parse(page);
+            WebView webView = new WebView(MainActivity.this);
+            WebViewClient client = new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    String url = request.getUrl().toString();
+                    if (url.contains("pavlok-bu-cs591/auth/pavlok/result")) {
+                        handleUri(request.getUrl());
+                        return false;
+                    } else {
+                        return super.shouldOverrideUrlLoading(view, request);
+                    }
+                }
+
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                    if (url.contains("pavlok-bu-cs591/auth/pavlok/result")) {
+                        handleUri(Uri.parse(url));
+                        return false;
+                    } else {
+                        return super.shouldOverrideUrlLoading(view, url);
+                    }
+                }
+            };
+            webView.setWebViewClient(client);
+            webView.requestFocus(View.FOCUS_DOWN);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                    getWindowManager().getDefaultDisplay().getWidth(),
+                    getWindowManager().getDefaultDisplay().getHeight());
+            webView.loadUrl(page);
+            Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+            dialog.addContentView(webView, params);
+            dialog.show();
+        }
+
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
 
             final String authCode =this.code;
@@ -109,48 +140,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     //runtime permissions check
-                    btn.setVisibility(disableStart);
-                    if (disableStart == View.VISIBLE) {
-                        stopBtn.setVisibility(View.VISIBLE);
-                    } else {
-                        stopBtn.setVisibility(View.INVISIBLE);
-                    }
-                    String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
-                    Uri uri = Uri.parse(page);
-                    WebView webView = new WebView(MainActivity.this);
-                    WebViewClient client = new WebViewClient() {
-                        @Override
-                        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                            String url = request.getUrl().toString();
-                            if (url.contains("pavlok-bu-cs591/auth/pavlok/result")) {
-                                handleUri(request.getUrl());
-                                return false;
-                            } else {
-                                return super.shouldOverrideUrlLoading(view, request);
-                            }
-                        }
+                    btn.setVisibility(View.INVISIBLE);
+                    stopBtn.setVisibility(View.VISIBLE);
 
-                        @Override
-                        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-                            if (url.contains("pavlok-bu-cs591/auth/pavlok/result")) {
-                                handleUri(Uri.parse(url));
-                                return false;
-                            } else {
-                                return super.shouldOverrideUrlLoading(view, url);
-                            }
-                        }
-                    };
-                    webView.setWebViewClient(client);
-                    webView.requestFocus(View.FOCUS_DOWN);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                            getWindowManager().getDefaultDisplay().getWidth(),
-                            getWindowManager().getDefaultDisplay().getHeight());
-                    webView.loadUrl(page);
-                    Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-                    dialog.addContentView(webView, params);
-                    dialog.show();
 
                     if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -165,6 +157,9 @@ public class MainActivity extends AppCompatActivity {
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, vehicleSpeedLL);
                     }
+
+                    SpeedCheckTask task = new SpeedCheckTask(authCode);
+                    task.execute();
                 }
             });
 
@@ -275,10 +270,11 @@ public class MainActivity extends AppCompatActivity {
 
     protected void handleUri(Uri uri) {
             this.code  = uri.getQueryParameter("code");
-            SpeedCheckTask task = new SpeedCheckTask(this.code);
-            task.execute();
+
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
-            intent.putExtra("startBtnVisibility",View.INVISIBLE);
+            //intent.putExtra("startBtnVisibility",View.INVISIBLE);
+            intent.putExtra("isRedirect",true);
+            intent.putExtra("code",this.code);
             startActivity(intent);
     }
 

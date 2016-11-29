@@ -56,7 +56,7 @@ public class SpeedCheckTask extends AsyncTask {
 
     private boolean isSpeedNearWarning(double speed) {
 
-        if(vehicleSpeed>=speedLimit-10){
+        if(speed>=speedLimit-10){
             return true;
         }
         return false;
@@ -65,7 +65,7 @@ public class SpeedCheckTask extends AsyncTask {
 
     private boolean isSpeedIllegal(double speed) {
 
-        if(vehicleSpeed>speedLimit){
+        if(speed>speedLimit){
             return true;
         }
         return false;
