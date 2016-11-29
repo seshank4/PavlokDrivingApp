@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     //Tomtom
     private LocationManager locationManager;
     private LocationListener locationListener = null;
+    private LocationListener vehicleSpeedLL = null;
 
     private Button btnTomTom;
 
@@ -147,6 +148,21 @@ public class MainActivity extends AppCompatActivity {
                     Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
                     dialog.addContentView(webView, params);
                     dialog.show();
+
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    }
+                    //if permissions have already been granted, grab a reference to the class defined
+                    // MyLocationListener
+                    else {
+                        locationListener = new MyLocationListener();
+
+                        // gets the gps coords every 5 seconds and when you have moved more than 1 meter
+                        // leave at 0 for testing
+                        Log.e("calling requestlocation", "calling requestlocation");
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
+                    }
                 }
             });
 
@@ -156,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, TripSummary.class);
                     startActivity(intent);
                 }
+
             });
 
             stopBtn.setOnClickListener(new View.OnClickListener() {
