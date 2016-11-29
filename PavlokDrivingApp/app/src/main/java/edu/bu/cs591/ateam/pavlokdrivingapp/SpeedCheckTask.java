@@ -1,45 +1,27 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.StrictMode;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-import android.widget.Toast;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
 
 
 public class SpeedCheckTask extends AsyncTask {
 
     public static boolean stopTrip = false;
     public static int speedLimit;
+    public static String token = "";
     private  String code;
 
-
-    private LocationManager locationMangaer = null;
 
     public SpeedCheckTask(String code){
         this.code = code;
@@ -50,14 +32,16 @@ public class SpeedCheckTask extends AsyncTask {
 
         double speed = 50.0;
 
-        while(!stopTrip){
+        token = authorizeAndGetToken(code);
 
-            //Log.i("SpeedCheck", "in While :"+stopTrip);
+        while(!stopTrip){
 
             if(isSpeedIllegal(speed)){
                 doBeep();
+                doVibrate();
+                flashLED();
             }else if(isSpeedNearWarning(speed)){
-                // TODO: 11/27/2016 beep
+                doBeep();
             }else{
                 continue;
             }
@@ -70,45 +54,61 @@ public class SpeedCheckTask extends AsyncTask {
 
         }
         
-        Log.i("SpeedCheck"," I'am out :"+stopTrip);
         return null;
     }
 
     private boolean isSpeedNearWarning(double speed) {
-        boolean isSpeedNearWarning = true;
 
-        //double speedLimit = getSpeedLimit();
-
-
-        return isSpeedNearWarning;
+        if(speed>=speedLimit-10){
+            return true;
+        }
+        return false;
     }
 
 
     private boolean isSpeedIllegal(double speed) {
-        boolean isSpeedLegal = false;
-
-        //double speedLimit = getSpeedLimit();
 
         if(speed>speedLimit){
             return true;
         }
-        return isSpeedLegal;
+        return false;
     }
 
     @Override
     protected void onPostExecute(Object o) {
-
 
         super.onPostExecute(o);
     }
 
     private void doBeep() {
         PavlokConnection conn = new PavlokConnection();
-        if(this.code!=null && this.code!="") {
-           // conn.execute("beep", 255, );
-            String token = authorizeAndGetToken(code);
+
+        if(this.token!=null && this.token!="") {
+
             try {
                 doAction(token, "beep", 255);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void doVibrate() {
+        PavlokConnection conn = new PavlokConnection();
+        if(this.token!=null && this.token!="") {
+            try {
+                doAction(token, "vibration", 255);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void flashLED() {
+        PavlokConnection conn = new PavlokConnection();
+        if(this.token!=null && this.token!="") {
+            try {
+                doAction(token, "led", 4);
             } catch (IOException e) {
                 e.printStackTrace();
             }
