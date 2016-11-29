@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onLocationChanged(Location location) {
-            SpeedCheckTask.vehicleSpeed = (int) location.getSpeed();
+            SpeedCheckTask.vehicleSpeed = location.getSpeed();
         }
 
         @Override

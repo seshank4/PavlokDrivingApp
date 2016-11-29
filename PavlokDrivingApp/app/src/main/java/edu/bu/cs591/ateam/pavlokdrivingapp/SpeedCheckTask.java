@@ -21,7 +21,7 @@ public class SpeedCheckTask extends AsyncTask {
     public static int speedLimit;
     public static String token = "";
     private  String code;
-    public static int vehicleSpeed;
+    public static double vehicleSpeed;
 
 
     public SpeedCheckTask(String code){
@@ -30,18 +30,14 @@ public class SpeedCheckTask extends AsyncTask {
 
     @Override
     protected Object doInBackground(Object[] params) {
-
-        double speed = 50.0;
-
         token = authorizeAndGetToken(code);
 
         while(!stopTrip){
-
-            if(isSpeedIllegal(speed)){
+            if(isSpeedIllegal(vehicleSpeed)){
                 doBeep();
                 doVibrate();
                 flashLED();
-            }else if(isSpeedNearWarning(speed)){
+            }else if(isSpeedNearWarning(vehicleSpeed)){
                 doBeep();
             }else{
                 continue;
@@ -60,7 +56,7 @@ public class SpeedCheckTask extends AsyncTask {
 
     private boolean isSpeedNearWarning(double speed) {
 
-        if(speed>=speedLimit-10){
+        if(vehicleSpeed>=speedLimit-10){
             return true;
         }
         return false;
