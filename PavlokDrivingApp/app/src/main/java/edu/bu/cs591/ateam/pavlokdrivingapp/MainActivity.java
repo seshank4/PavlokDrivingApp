@@ -189,8 +189,9 @@ public class MainActivity extends AppCompatActivity {
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 GPS_REQUEST_CODE);
                     }else {
-                        if(null != locationManager && null != locationListener) {
+                        if(null != locationManager && null != locationListener && null != vehicleSpeedLL) {
                             locationManager.removeUpdates(locationListener);
+                            locationManager.removeUpdates(vehicleSpeedLL);
                         }
                         Log.d("location", "removed updates successfulyy");
                     }
