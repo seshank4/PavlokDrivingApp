@@ -188,8 +188,7 @@ public class MainActivity extends AppCompatActivity {
             summary.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, TripSummary.class);
-                    startActivity(intent);
+
                 }
 
             });
@@ -263,12 +262,15 @@ public class MainActivity extends AppCompatActivity {
                             }
                             locationManager.removeUpdates(locationListener);
                             locationManager.removeUpdates(vehicleSpeedLL);
-
+                            Intent intent = new Intent(MainActivity.this, TripSummary.class);
+                            SharedPreferences prefs = getApplicationContext().getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
+                            int tripId = prefs.getInt("tripId",0);
+                            prefs.edit().remove("tripId");
+                            intent.putExtra("tripId", tripId);
+                            startActivity(intent);
                         }
                         Log.d("location", "removed updates successfulyy");
                     }
-
-
                 }
             });
 
