@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> mAdapter;
     public int disableStart = View.VISIBLE;
     private static final int GPS_REQUEST_CODE = 10;
+    public static int userId = 0;
 
     //Tomtom
     private LocationManager locationManager;
