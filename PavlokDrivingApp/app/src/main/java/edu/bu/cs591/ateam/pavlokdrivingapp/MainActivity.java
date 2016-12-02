@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         if(!isRedirect) {
+            isRedirect = false;
             String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
             Uri uri = Uri.parse(page);
             WebView webView = new WebView(MainActivity.this);
