@@ -67,6 +67,12 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_summary);
         Log.i(MYTAG, "onCreate Called.");
 
+        Bundle bundle = getIntent().getExtras();
+        int tripId = 0;
+        if(bundle != null){
+            tripId = bundle.getInt("tripId");
+        }
+
         tvTitle = (TextView)findViewById(R.id.tvTitle);
         btnReload = (Button)findViewById(R.id.btnReload);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
