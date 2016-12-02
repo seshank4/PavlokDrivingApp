@@ -20,10 +20,17 @@ public class TomTomResponse {
     private String countySubdivision;
     private String postalCode;
     private String freeformAddress;
-
-
+    private String municipalitySubdivision;
     public int getBuildingNumber() {
         return buildingNumber;
+    }
+
+    public String getMunicipalitySubdivision() {
+        return municipalitySubdivision;
+    }
+
+    public void setMunicipalitySubdivision(String municipalitySubdivision) {
+        this.municipalitySubdivision = municipalitySubdivision;
     }
 
     public void setBuildingNumber(int buildingNumber) {

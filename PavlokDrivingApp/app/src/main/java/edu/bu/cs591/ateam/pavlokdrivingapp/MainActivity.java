@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
@@ -11,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -33,6 +35,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
@@ -40,6 +43,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,6 +63,13 @@ public class MainActivity extends AppCompatActivity {
     public int disableStart = View.VISIBLE;
     private static final int GPS_REQUEST_CODE = 10;
     public static int userId = 0;
+    public static final String MY_PREFS = "";
+    private String BASE_URL = "api.tomtom.com/";
+    private int VERSION_NUMBER = 2;
+    private String EXT = "json/"; // the extension of the response. (json, jsonp, js, or xml)
+    private String API_KEY = "h8fxx4ptxbtb4y7xv5r9x7ga";
+
+
 
     //Tomtom
     private LocationManager locationManager;
@@ -67,8 +83,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        //SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
+        //prefs.edit().putInt("userId",0).apply();
+
         locationManager = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new MyLocationListener();
+        locationListener = new MyLocationListener(MainActivity.this);
         vehicleSpeedLL = new myVehicleSpeedLL();
         if (ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -158,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, vehicleSpeedLL);
                     }
-
+                    MyLocationListener.flag = false;
                     SpeedCheckTask task = new SpeedCheckTask(authCode);
                     task.execute();
                 }
@@ -186,11 +206,68 @@ public class MainActivity extends AppCompatActivity {
                                 GPS_REQUEST_CODE);
                     }else {
                         if(null != locationManager && null != locationListener && null != vehicleSpeedLL) {
+                            MyLocationListener.stopFlag=true;
+                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0, locationListener);
+                            Location destLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            double destLat = destLocation.getLatitude();
+                            double destLong = destLocation.getLongitude();
+                            final String string_url = "https://" + BASE_URL + "search/" + VERSION_NUMBER + "/reverseGeocode/" +
+                                    destLat + "," + destLong + "." + EXT + "?key=" + API_KEY + "&returnSpeedLimit=true"
+                                    + "&returnRoadUse=true" + "&roadUse=" + "[\"Arterial\"]";
+                            //StrictMode stuff has to be here because there was an error being thrown.
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+
+                            // Creating the URL object to pass to the HTTP request function
+                            // must put in try catch since url may be invalid
+                            URL url = null;
+                            try {
+                                url = new URL(string_url);
+                            } catch (MalformedURLException e) {
+                                e.printStackTrace();
+                            }
+
+                            Log.e("in SpeedCheckTask.get",url.toString());
+//        Toast.makeText(context, "lat and long are" + longitude + "," + latitude, Toast.LENGTH_SHORT).show();
+
+        /*//sb variable is for testing
+        StringBuilder sb = new StringBuilder();
+        //pass url and sb to getHTTPConnection
+        sb = getHttpURLConnection(url,sb);*/
+                            HttpURLConnection connection;
+                            TomTomResponse responseObj = null;
+                            try {
+                                connection = (HttpURLConnection) url.openConnection();
+
+                                ObjectMapper mapper = new ObjectMapper();
+                                try {
+                                    System.out.println(connection.getResponseCode());
+                                    //responseObj = mapper.readValue(connection.getInputStream(), TomTomResponse.class);
+                                    JsonNode node  = mapper.readTree(connection.getInputStream());
+                                    JsonNode subNode = node.get("addresses").get(0).get("address");
+                                    responseObj = mapper.readValue(subNode,TomTomResponse.class);
+                                    // subNode.get("address")
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                String destAddr = "";
+                                String destSubDiv = "";
+                                Date endTime = null;
+                                destAddr = responseObj.getFreeformAddress();
+                                destSubDiv = responseObj.getMunicipalitySubdivision();
+                                endTime = Calendar.getInstance().getTime();
+                                insertDestInfo(destAddr,destSubDiv,String.valueOf(destLat),String.valueOf(destLong),endTime);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                             locationManager.removeUpdates(locationListener);
                             locationManager.removeUpdates(vehicleSpeedLL);
+
                         }
                         Log.d("location", "removed updates successfulyy");
                     }
+
+
                 }
             });
 
@@ -235,7 +312,28 @@ public class MainActivity extends AppCompatActivity {
             mDrawerLayout.setDrawerListener(mDrawerToggle);
 
     }
+    private void insertDestInfo(String destAddr, String destSubDiv, String destLat, String destLong, Date destTime) {
+        Statement stmt = null;
+        Connection conn= null;
+        java.sql.Timestamp sqlDate = new java.sql.Timestamp(destTime.getTime());
+        int userId=0;
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
+        int destTripId = prefs.getInt("tripId",0);
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            stmt = conn.createStatement();
+            conn.setAutoCommit(false);
+            stmt.executeUpdate("update pavlokdb.trip_summary set destination_addr='"+destAddr+"',trip_end_dt='"+sqlDate+"',dest_subdiv='"+destSubDiv+"',dest_lat='"+destLat+"',dest_long='"+destLong+"' where trip_id = "+destTripId);
 
+            conn.commit();
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults){

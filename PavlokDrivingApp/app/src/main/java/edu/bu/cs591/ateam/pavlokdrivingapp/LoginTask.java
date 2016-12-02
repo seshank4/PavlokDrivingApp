@@ -1,7 +1,9 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -40,7 +42,12 @@ public class LoginTask extends AsyncTask{
                 login = true;
                 Statement stmt1 = conn.createStatement();
                 ResultSet rs1 = stmt1.executeQuery("SELECT user_id from pavlokdb.users where EMAIL = '"+params[0]+"' AND PASSWORD = '"+params[1]+"'");
-                MainActivity.userId =  rs1.getInt("user_id");
+                SharedPreferences prefs = this.activity.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
+                if(rs1.next()) {
+                    prefs.edit().putInt("userId", rs1.getInt(1)).commit();
+
+                }
+                //MainActivity.userId =  rs1.getInt("user_id");
             }
             else {
                 login = false;
