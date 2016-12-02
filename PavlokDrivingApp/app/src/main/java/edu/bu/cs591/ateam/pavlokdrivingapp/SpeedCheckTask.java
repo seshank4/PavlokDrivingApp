@@ -26,6 +26,7 @@ public class SpeedCheckTask extends AsyncTask {
 
     public SpeedCheckTask(String code){
         this.code = code;
+        speedLimit = 20;
     }
 
     @Override
