@@ -33,12 +33,6 @@
         </activity>
         <activity android:name=".RegisterUserActivity" />
 
-        <!--<activity android:name=".TripSummary">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="edu.bu.cs591.ateam.pavlokdrivingapp.MainActivity" />
-        </activity>-->
-
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
