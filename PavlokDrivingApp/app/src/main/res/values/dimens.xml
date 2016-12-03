@@ -3,4 +3,11 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="main_btn_size">200dp</dimen>
+    <dimen name="login_padding_left">5dp</dimen>
+    <dimen name="layout_marginTop">20dp</dimen>
+    <dimen name="activity_login_layout_height">60dp</dimen>
+    <dimen name="activity_login_layout_marginRight">5dp</dimen>
+    <dimen name="activity_login_button_layout_width">0dp</dimen>
+    <dimen name="activity_login_button_layout_weight">1dp</dimen>
+    <dimen name="activity_login_layout_width">0dip</dimen>
 </resources>

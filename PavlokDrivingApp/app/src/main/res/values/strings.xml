@@ -40,4 +40,13 @@
         <item>90</item>
     </array>
     <string name="title_activity_trip_summary">Map</string>
+    <string name="username_email">Username/Email</string>
+    <string name="password">Password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="start_trip">Start Trip</string>
+    <string name="stop_trip">Stop Trip</string>
+    <string name="trip_summary">Trip Summary</string>
+    <string name="reload_map">Reload Map</string>
+    <string name="tvtripid">tvTripID</string>
+    <string name="login">Login</string>
 </resources>

@@ -7,44 +7,44 @@
     android:layout_width="match_parent">
     <EditText
         android:layout_width="fill_parent"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/activity_login_layout_height"
         android:id="@+id/etUserName"
         android:textColor="#000"
         android:background="@drawable/group_top"
-        android:paddingLeft="5dp"
-        android:hint="Username/Email"
-        android:layout_marginTop="20dp"
+        android:paddingLeft="@dimen/login_padding_left"
+        android:hint="@string/username_email"
+        android:layout_marginTop="@dimen/layout_marginTop"
         android:maxLines="1" />
     <EditText
         android:layout_width="fill_parent"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/activity_login_layout_height"
         android:inputType="textPassword"
         android:textColor="#000"
-        android:paddingLeft="5dp"
+        android:paddingLeft="@dimen/login_padding_left"
         android:background="@drawable/group_bottom"
         android:id="@+id/etPassword"
-        android:hint="Password"
+        android:hint="@string/password"
         android:maxLines="1" />
     <LinearLayout
         android:id="@+id/linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="@dimen/layout_marginTop">
         <Button
-            android:layout_width="0dip"
+            android:layout_width="@dimen/activity_login_layout_width"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Login"
+            android:text="@string/login"
             android:id="@+id/Blogin"
             style="@style/button"
             android:background="@drawable/button"
-            android:layout_marginRight="5dp"/>
+            android:layout_marginRight="0dip"/>
         <Button
-            android:layout_width="0dip"
+            android:layout_width="@dimen/activity_login_layout_width"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Sign Up"
+            android:text="@string/sign_up"
             style="@style/button"
             android:id="@+id/signUpBtn"
             android:background="@drawable/button" />

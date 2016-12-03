@@ -7,7 +7,7 @@
     tools:context="edu.bu.cs591.ateam.pavlokdrivingapp.TripSummary">
 
     <TextView
-        android:text="Trip Summary"
+        android:text="@string/trip_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvTitle"
@@ -32,7 +32,7 @@
             />
 
         <Button
-            android:text="Reload Map"
+            android:text="@string/reload_map"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/btnReload" />

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><string name="app_name">Pavlok Driving App</string>
+    <string name="title_activity_navigation">Actividad de Navegación</string>
+
+    <string name="drawer_open">Abra navigation drawer</string>
+    <string name="drawer_close">Cierra navigation drawer</string>
+
+    <string name="action_settings">Ajustes</string>
+
+    <string-array name="trips">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <array name="speed_limits">
+        <item>0</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>35</item>
+        <item>40</item>
+        <item>45</item>
+        <item>50</item>
+        <item>55</item>
+        <item>60</item>
+        <item>65</item>
+        <item>70</item>
+        <item>75</item>
+        <item>80</item>
+        <item>85</item>
+        <item>90</item>
+    </array>
+    <string name="title_activity_trip_summary">Mapa</string>
+    <string name="username_email">Nombre de Usuario/Email</string>
+    <string name="password">Contraseña</string>
+    <string name="sign_up">Regístrate</string>
+    <string name="start_trip">Iniciar viaje</string>
+    <string name="stop_trip">Detener viaje</string>
+    <string name="trip_summary">Resumen del viaje</string>
+    <string name="reload_map">Recargar mapa</string>
+    <string name="tvtripid">tvViajeID</string>
+    <string name="login">Iniciar sesión</string>
+
+</resources>

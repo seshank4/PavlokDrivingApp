@@ -48,14 +48,14 @@
             android:layout_weight="1">
 
             <Button
-                android:text="Start Trip"
+                android:text="@string/start_trip"
                 android:layout_width="@dimen/main_btn_size"
                 android:layout_height="@dimen/main_btn_size"
                 android:id="@+id/btnOauthTest"
                 android:background="@drawable/round_button" />
 
             <Button
-                android:text="Stop Trip"
+                android:text="@string/stop_trip"
                 android:layout_width="@dimen/main_btn_size"
                 android:layout_height="@dimen/main_btn_size"
                 android:id="@+id/btnStopTrip"
