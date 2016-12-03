@@ -17,12 +17,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="edu.bu.cs591.ateam.pavlokdrivingapp.MainActivity">
 
-    <Button
-        android:id="@+id/btnTomTom"
-        android:text="TomTom Test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -30,55 +24,58 @@
         android:gravity="right">
 
         <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         </LinearLayout>
+
     </LinearLayout>
 
+
+</LinearLayout>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
-            android:text="Start Trip"
+        <RelativeLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnOauthTest"
-            android:backgroundTint="@android:color/holo_green_light" />
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_weight="1">
 
-        <Button
-            android:text="Stop Trip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnStopTrip"
-            android:backgroundTint="@android:color/holo_red_light"
-            android:textSize="24sp"
-            android:visibility="invisible" />
+            <Button
+                android:text="Start Trip"
+                android:layout_width="@dimen/main_btn_size"
+                android:layout_height="@dimen/main_btn_size"
+                android:id="@+id/btnOauthTest"
+                android:background="@drawable/round_button" />
 
-        <Button
-            android:text="Summary(temp)"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnSummary" />
+            <Button
+                android:text="Stop Trip"
+                android:layout_width="@dimen/main_btn_size"
+                android:layout_height="@dimen/main_btn_size"
+                android:id="@+id/btnStopTrip"
+                android:visibility="invisible"
+                android:background="@drawable/round_button_stop" />
+
+        </RelativeLayout>
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/lvTrips" />
         </LinearLayout>
-
     </LinearLayout>
-
-</LinearLayout>
 
     <ListView
         android:id="@+id/navList"

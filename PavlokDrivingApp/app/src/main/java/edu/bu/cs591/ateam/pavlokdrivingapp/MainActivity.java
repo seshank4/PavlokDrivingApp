@@ -108,9 +108,9 @@ public class MainActivity extends AppCompatActivity {
 
         final Button btn = (Button)findViewById(R.id.btnOauthTest);
         final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
-        btnTomTom = (Button) findViewById(R.id.btnTomTom);
+        //btnTomTom = (Button) findViewById(R.id.btnTomTom);
 
-        Button summary = (Button)findViewById(R.id.btnSummary);
+        //Button summary = (Button)findViewById(R.id.btnSummary);
         Bundle bundle = getIntent().getExtras();
         boolean isRedirect = false;
         if(bundle != null) {
@@ -206,11 +206,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            summary.setOnClickListener(new View.OnClickListener() {
+           /* summary.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                 }
-            });
+            });*/
 
             stopBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
