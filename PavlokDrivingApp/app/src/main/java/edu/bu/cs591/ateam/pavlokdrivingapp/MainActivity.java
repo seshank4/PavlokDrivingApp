@@ -1,6 +1,7 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -93,9 +94,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        //SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
+        SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
         //prefs.edit().putInt("userId",0).apply();
-
+        String acode = prefs.getString("code","");
+        if(!acode.equals("")){
+            this.code = acode;
+        }
         locationManager = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener(MainActivity.this);
         vehicleSpeedLL = new myVehicleSpeedLL();
@@ -115,7 +119,9 @@ public class MainActivity extends AppCompatActivity {
         boolean isRedirect = false;
         if(bundle != null) {
             isRedirect = bundle.getBoolean("isRedirect");
-            this.code = bundle.getString("code");
+            /*if(bundle.getString("code") !=null && !bundle.getString("code").equals("")) {
+                this.code = bundle.getString("code");
+            }*/
         }
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
@@ -124,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         if(!isRedirect) {
-            isRedirect = false;
+            //isRedirect = false;
             String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
             Uri uri = Uri.parse(page);
             WebView webView = new WebView(MainActivity.this);
@@ -201,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     MyLocationListener.flag = false;
-                    SpeedCheckTask task = new SpeedCheckTask(authCode);
+                    SpeedCheckTask task = new SpeedCheckTask(authCode,locationManager,MainActivity.this);
                     task.execute();
                 }
             });
@@ -386,7 +392,11 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
             //intent.putExtra("startBtnVisibility",View.INVISIBLE);
             intent.putExtra("isRedirect",true);
-            intent.putExtra("code",this.code);
+            //intent.putExtra("code",this.code);
+            SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
+            if(this.code != null && !this.code.equals("")) {
+                prefs.edit().putString("code", this.code).commit();
+            }
             startActivity(intent);
     }
 
@@ -406,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onLocationChanged(Location location) {
-            SpeedCheckTask.vehicleSpeed = location.getSpeed();
+            //SpeedCheckTask.vehicleSpeed = location.getSpeed();
         }
 
         @Override

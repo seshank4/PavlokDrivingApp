@@ -124,7 +124,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT trip_start_dt,trip_end_dt,source_addr,sourec_subdiv,source_lat,source_long,destination_addr,dest_subdiv,dest_lat,dest_long FROM pavlokdb.trip_summary WHERE trip_id = '"+tripId+"'");
+            ResultSet rs = stmt.executeQuery("SELECT trip_start_dt,trip_end_dt,source_addr,source_subdiv,source_lat,source_long,destination_addr,dest_subdiv,dest_lat,dest_long FROM pavlokdb.trip_summary WHERE trip_id = '"+tripId+"'");
             if (rs.next()) {
                 tripStartTime=rs.getDate("trip_start_dt");
                 tripEndTime=rs.getDate("trip_end_dt");

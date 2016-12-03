@@ -58,7 +58,7 @@ public class MyLocationListener implements LocationListener {
         String speedLimit  = getSpeedLimitFromTomTom(loc.getLatitude()+"", loc.getLongitude()+"");
 
         String speedL = speedLimit.substring(0,speedLimit.indexOf("."));
-        SpeedCheckTask.speedLimit = Integer.parseInt(speedL);
+//        SpeedCheckTask.speedLimit = Integer.parseInt(speedL);
     }
 
     protected String getSpeedLimitFromTomTom(final String latitude, final String longitude){

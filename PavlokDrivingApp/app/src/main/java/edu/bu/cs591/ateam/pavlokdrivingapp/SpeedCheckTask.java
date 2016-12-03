@@ -1,7 +1,13 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
@@ -18,40 +24,50 @@ import java.net.URL;
 public class SpeedCheckTask extends AsyncTask {
 
     public static boolean stopTrip = false;
-    public static int speedLimit;
+    private int speedLimit;
     public static String token = "";
     private  String code;
-    public static double vehicleSpeed;
+    public double vehicleSpeed;
+    private LocationManager locationManager;
+    private Activity activity;
 
-
-    public SpeedCheckTask(String code){
+    public SpeedCheckTask(String code, LocationManager locationManager,Activity activity){
+        this.locationManager = locationManager;
         this.code = code;
-        speedLimit = 20;
+        this.activity = activity;
+        this.speedLimit = 20;
     }
 
     @Override
     protected Object doInBackground(Object[] params) {
         token = authorizeAndGetToken(code);
+        if (ActivityCompat.checkSelfPermission(this.activity,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-        while(!stopTrip){
-            if(isSpeedIllegal(vehicleSpeed)){
-                doBeep();
-                doVibrate();
-                flashLED();
-            }else if(isSpeedNearWarning(vehicleSpeed)){
-                doBeep();
-            }else{
-                continue;
+        }else {
+            while (!stopTrip) {
+                Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                vehicleSpeed = loc.getSpeed();
+                TomTomResponse responseObj = TomTomUtil.getTomTomResponse(loc.getLatitude(),loc.getLongitude());
+                String speedLim = responseObj.getSpeedLimit();
+                String speedL = speedLim.substring(0,speedLim.indexOf("."));
+                speedLimit = Integer.parseInt(speedL);
+                if (isSpeedIllegal(vehicleSpeed)) {
+                    doBeep();
+                    doVibrate();
+                    flashLED();
+                } else if (isSpeedNearWarning(vehicleSpeed)) {
+                    doBeep();
+                }
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
             }
-
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
         }
-        
         return null;
     }
 
