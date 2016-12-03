@@ -13,6 +13,8 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -35,6 +37,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -45,6 +51,7 @@ import java.net.URI;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
@@ -68,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private int VERSION_NUMBER = 2;
     private String EXT = "json/"; // the extension of the response. (json, jsonp, js, or xml)
     private String API_KEY = "h8fxx4ptxbtb4y7xv5r9x7ga";
+    private GoogleApiClient mGoogleApiClient;
 
 
 
@@ -77,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private LocationListener vehicleSpeedLL = null;
 
     private Button btnTomTom;
+    private int tripId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,11 +182,23 @@ public class MainActivity extends AppCompatActivity {
                     //if permissions have already been granted, grab a reference to the class defined
                     // MyLocationListener
                     else {
+
                         // gets the gps coords every 5 seconds and when you have moved more than 1 meter
                         // leave at 0 for testing
                         Log.e("calling requestlocation", "calling requestlocation");
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, vehicleSpeedLL);
+//                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
+//                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, vehicleSpeedLL);
+                        Location sourceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                        double sourceLat = sourceLocation.getLatitude();
+                        double sourceLong = sourceLocation.getLongitude();
+                        TomTomResponse responseObj = TomTomUtil.getTomTomResponse(sourceLat,sourceLong);
+                        String startAddr = responseObj.getFreeformAddress();
+                        String startSubDiv = responseObj.getMunicipalitySubdivision();
+                        Date startTime = Calendar.getInstance().getTime();
+                        int tripId =  insertSourceInfo(startAddr,startSubDiv,String.valueOf(sourceLat),String.valueOf(sourceLong),startTime);
+                        setTripId(tripId);
+
                     }
                     MyLocationListener.flag = false;
                     SpeedCheckTask task = new SpeedCheckTask(authCode);
@@ -188,9 +209,7 @@ public class MainActivity extends AppCompatActivity {
             summary.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                 }
-
             });
 
             stopBtn.setOnClickListener(new View.OnClickListener() {
@@ -207,65 +226,20 @@ public class MainActivity extends AppCompatActivity {
                     }else {
                         if(null != locationManager && null != locationListener && null != vehicleSpeedLL) {
                             MyLocationListener.stopFlag=true;
-                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0, locationListener);
+                            //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0, locationListener);
                             Location destLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                             double destLat = destLocation.getLatitude();
                             double destLong = destLocation.getLongitude();
-                            final String string_url = "https://" + BASE_URL + "search/" + VERSION_NUMBER + "/reverseGeocode/" +
-                                    destLat + "," + destLong + "." + EXT + "?key=" + API_KEY + "&returnSpeedLimit=true"
-                                    + "&returnRoadUse=true" + "&roadUse=" + "[\"Arterial\"]";
-                            //StrictMode stuff has to be here because there was an error being thrown.
-                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                            StrictMode.setThreadPolicy(policy);
-
-                            // Creating the URL object to pass to the HTTP request function
-                            // must put in try catch since url may be invalid
-                            URL url = null;
-                            try {
-                                url = new URL(string_url);
-                            } catch (MalformedURLException e) {
-                                e.printStackTrace();
-                            }
-
-                            Log.e("in SpeedCheckTask.get",url.toString());
-//        Toast.makeText(context, "lat and long are" + longitude + "," + latitude, Toast.LENGTH_SHORT).show();
-
-        /*//sb variable is for testing
-        StringBuilder sb = new StringBuilder();
-        //pass url and sb to getHTTPConnection
-        sb = getHttpURLConnection(url,sb);*/
-                            HttpURLConnection connection;
-                            TomTomResponse responseObj = null;
-                            try {
-                                connection = (HttpURLConnection) url.openConnection();
-
-                                ObjectMapper mapper = new ObjectMapper();
-                                try {
-                                    System.out.println(connection.getResponseCode());
-                                    //responseObj = mapper.readValue(connection.getInputStream(), TomTomResponse.class);
-                                    JsonNode node  = mapper.readTree(connection.getInputStream());
-                                    JsonNode subNode = node.get("addresses").get(0).get("address");
-                                    responseObj = mapper.readValue(subNode,TomTomResponse.class);
-                                    // subNode.get("address")
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                String destAddr = "";
-                                String destSubDiv = "";
-                                Date endTime = null;
-                                destAddr = responseObj.getFreeformAddress();
-                                destSubDiv = responseObj.getMunicipalitySubdivision();
-                                endTime = Calendar.getInstance().getTime();
-                                insertDestInfo(destAddr,destSubDiv,String.valueOf(destLat),String.valueOf(destLong),endTime);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            locationManager.removeUpdates(locationListener);
-                            locationManager.removeUpdates(vehicleSpeedLL);
+                            TomTomResponse responseObj = TomTomUtil.getTomTomResponse(destLat,destLong);
+                            String destAddr = "";
+                            String destSubDiv = "";
+                            Date endTime = null;
+                            destAddr = responseObj.getFreeformAddress();
+                            destSubDiv = responseObj.getMunicipalitySubdivision();
+                            endTime = Calendar.getInstance().getTime();
+                            int tripId = getTripId();
+                            insertDestInfo(destAddr,destSubDiv,String.valueOf(destLat),String.valueOf(destLong),endTime,tripId);
                             Intent intent = new Intent(MainActivity.this, TripSummary.class);
-                            SharedPreferences prefs = getApplicationContext().getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
-                            int tripId = prefs.getInt("tripId",0);
-                            prefs.edit().remove("tripId");
                             intent.putExtra("tripId", tripId);
                             startActivity(intent);
                         }
@@ -315,22 +289,58 @@ public class MainActivity extends AppCompatActivity {
             mDrawerLayout.setDrawerListener(mDrawerToggle);
 
     }
-    private void insertDestInfo(String destAddr, String destSubDiv, String destLat, String destLong, Date destTime) {
+
+    private int getTripId() {
+        return this.tripId;
+    }
+
+    private void setTripId(int tripId) {
+        this.tripId = tripId;
+    }
+
+    private int insertSourceInfo(String startAddr, String startSubDiv, String startLat, String startLong, Date startTime) {
         Statement stmt = null;
+        boolean status=false;
         Connection conn= null;
-        java.sql.Timestamp sqlDate = new java.sql.Timestamp(destTime.getTime());
+        java.sql.Timestamp sqlDate = new java.sql.Timestamp(startTime.getTime());
+        int tripId = 0;
         int userId=0;
-        SharedPreferences prefs = getApplicationContext().getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
-        int destTripId = prefs.getInt("tripId",0);
+        SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
+        userId = prefs.getInt("userId",0);
         try {
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
             stmt = conn.createStatement();
             conn.setAutoCommit(false);
-            stmt.executeUpdate("update pavlokdb.trip_summary set destination_addr='"+destAddr+"',trip_end_dt='"+sqlDate+"',dest_subdiv='"+destSubDiv+"',dest_lat='"+destLat+"',dest_long='"+destLong+"' where trip_id = "+destTripId);
-
+            stmt.executeUpdate("INSERT INTO pavlokdb.trip_summary(user_id,trip_start_dt,source_addr,source_subdiv,source_lat,source_long) VALUES('"+userId+"','"+sqlDate+"','"+startAddr+"','"+startSubDiv+"','"+startLat+"','"+startLong+"')",Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = stmt.getGeneratedKeys();
+            if(rs.next()){
+                tripId = rs.getInt(1);
+            }
             conn.commit();
 
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tripId;
+    }
+
+    private void insertDestInfo(String destAddr, String destSubDiv, String destLat, String destLong, Date destTime,int tripId) {
+        Statement stmt = null;
+        Connection conn= null;
+        java.sql.Timestamp sqlDate = new java.sql.Timestamp(destTime.getTime());
+        int userId=0;
+//        SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
+//        int destTripId = prefs.getInt("tripId",0);
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            stmt = conn.createStatement();
+            conn.setAutoCommit(false);
+            stmt.executeUpdate("update pavlokdb.trip_summary set destination_addr='"+destAddr+"',trip_end_dt='"+sqlDate+"',dest_subdiv='"+destSubDiv+"',dest_lat='"+destLat+"',dest_long='"+destLong+"' where trip_id = "+tripId);
+            conn.commit();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {

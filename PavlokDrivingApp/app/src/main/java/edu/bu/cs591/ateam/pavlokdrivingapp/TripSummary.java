@@ -23,6 +23,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,6 +64,17 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     private GoogleApiClient client;
     private LocationManager lm;
     private LocationListener ll;
+    Date tripStartTime;
+    Date tripEndTime;
+    String sourceAddr="";
+    String destAddr = "";
+    String sourceSubDiv="";
+    String destSubDiv="";
+
+    double sourceLat = 0.0;
+    double sourceLong = 0.0;
+    double destLat = 0.0;
+    double destLong = 0.0;
 
     TextView tvTitle;
     Button btnReload;
@@ -67,10 +85,18 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_summary);
         Log.i(MYTAG, "onCreate Called.");
 
+
+
         Bundle bundle = getIntent().getExtras();
         int tripId = 0;
         if(bundle != null){
             tripId = bundle.getInt("tripId");
+        }
+
+        try {
+            getSourceDestLoc(tripId);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         tvTitle = (TextView)findViewById(R.id.tvTitle);
@@ -89,6 +115,35 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
             }
         });
+    }
+
+    private void getSourceDestLoc(int tripId) throws SQLException {
+        Connection conn = null;
+        try {
+            int count = 0;
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT trip_start_dt,trip_end_dt,source_addr,sourec_subdiv,source_lat,source_long,destination_addr,dest_subdiv,dest_lat,dest_long FROM pavlokdb.trip_summary WHERE trip_id = '"+tripId+"'");
+            if (rs.next()) {
+                tripStartTime=rs.getDate("trip_start_dt");
+                tripEndTime=rs.getDate("trip_end_dt");
+                sourceAddr = rs.getString("source_addr");
+                destAddr = rs.getString("destination_addr");
+                sourceSubDiv = rs.getString("source_subdiv");
+                destSubDiv = rs.getString("dest_subdiv");
+                sourceLat = rs.getDouble("source_lat");
+                destLat = rs.getDouble("dest_lat");
+                sourceLong = rs.getDouble("source_long");
+                destLong = rs.getDouble("dest_long");
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            conn.close();
+        }
     }
 
     @Override
