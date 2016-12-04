@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
         //btnTomTom = (Button) findViewById(R.id.btnTomTom);
 
-        //Button summary = (Button)findViewById(R.id.btnSummary);
+//        Button summary = (Button)findViewById(R.id.btnSummary);
         Bundle bundle = getIntent().getExtras();
         boolean isRedirect = false;
         if(bundle != null) {

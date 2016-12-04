@@ -47,7 +47,7 @@
 
         <activity
             android:name=".TripSummary"
-            android:label="@string/title_activity_trip_summary">
+            android:label="Trip Summary">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.bu.cs591.ateam.pavlokdrivingapp.MainActivity" />
