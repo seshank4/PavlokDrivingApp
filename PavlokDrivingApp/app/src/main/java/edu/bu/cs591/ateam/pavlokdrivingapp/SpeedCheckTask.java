@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
@@ -36,7 +37,7 @@ public class SpeedCheckTask extends AsyncTask {
     private int speedLimit;
     public static String token = "";
     private  String code;
-    public int vehicleSpeed;
+    public double vehicleSpeed;
     private LocationManager locationManager;
     private Activity activity;
     private int tripId;
@@ -58,9 +59,14 @@ public class SpeedCheckTask extends AsyncTask {
         }else {
             while (!stopTrip) {
                 Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                vehicleSpeed = (int) loc.getSpeed();
+
+                vehicleSpeed = loc.getSpeed();
+                vehicleSpeed = vehicleSpeed / 0.44704; //convert to mph
+                //loc.
+                Log.d("Spped", "Current speed is " + String.valueOf(vehicleSpeed));
                 //vehicleSpeed = 50;
                 TomTomResponse responseObj = TomTomUtil.getTomTomResponse(loc.getLatitude(),loc.getLongitude());
+                Log.d("Frequent TomTom", "Calling tomtom api frequient");
                 String speedLim = responseObj.getSpeedLimit();
                 String speedL = speedLim.substring(0,speedLim.indexOf("."));
                 speedLimit = Integer.parseInt(speedL);
@@ -76,7 +82,7 @@ public class SpeedCheckTask extends AsyncTask {
                     doBeep();
                 }
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -126,7 +132,7 @@ public class SpeedCheckTask extends AsyncTask {
 
     private boolean isSpeedNearWarning(double speed) {
 
-        if(speed>=speedLimit-10){
+        if(speed>=speedLimit-5){
             return true;
         }
         return false;

@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                         // leave at 0 for testing
                         Log.e("calling requestlocation", "calling requestlocation");
 //                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
-//                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, vehicleSpeedLL);
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 0, vehicleSpeedLL);
                         Location sourceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
                         double sourceLat = sourceLocation.getLatitude();

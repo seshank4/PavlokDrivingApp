@@ -124,7 +124,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT latitude,longitude FROM pavlokdb.trip_detail WHERE trip_id = '"+tripId+"'");
-            if (rs.next()) {
+            while (rs.next()) {
                 ArrayList<Double> location = new ArrayList<>();
                 location.add(rs.getDouble("latitude"));
                 location.add(rs.getDouble("longitude"));
