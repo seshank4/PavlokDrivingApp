@@ -71,7 +71,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     double destLat = 0.0;
     double destLong = 0.0;
 
-    TextView tvTitle;
+//    TextView tvTitle;
     Button btnReload;
 
     @Override
@@ -92,7 +92,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
-        tvTitle = (TextView)findViewById(R.id.tvTitle);
+//        tvTitle = (TextView)findViewById(R.id.tvTitle);
         btnReload = (Button)findViewById(R.id.btnReload);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         ll = new MyLocationListener();
@@ -135,8 +135,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
                 end = new LatLng(destLat, destLong);
 
                 // FIND CENTER POINT
-                cLat = (sourceLat - destLat)/2;
-                cLong = (sourceLong - destLong)/2;
+                cLat = (sourceLat + destLat)/2;
+                cLong = (sourceLong + destLong)/2;
                 CENTER = new LatLng(cLat, cLong);
             }
         } catch (ClassNotFoundException e) {
