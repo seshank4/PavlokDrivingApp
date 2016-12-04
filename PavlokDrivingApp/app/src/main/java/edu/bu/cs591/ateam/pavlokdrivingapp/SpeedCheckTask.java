@@ -2,6 +2,8 @@ package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -19,6 +21,13 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class SpeedCheckTask extends AsyncTask {
@@ -27,15 +36,17 @@ public class SpeedCheckTask extends AsyncTask {
     private int speedLimit;
     public static String token = "";
     private  String code;
-    public double vehicleSpeed;
+    public int vehicleSpeed;
     private LocationManager locationManager;
     private Activity activity;
+    private int tripId;
 
-    public SpeedCheckTask(String code, LocationManager locationManager,Activity activity){
+    public SpeedCheckTask(String code, LocationManager locationManager,Activity activity,int tripId){
         this.locationManager = locationManager;
         this.code = code;
         this.activity = activity;
         this.speedLimit = 20;
+        this.tripId = tripId;
     }
 
     @Override
@@ -47,15 +58,20 @@ public class SpeedCheckTask extends AsyncTask {
         }else {
             while (!stopTrip) {
                 Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                vehicleSpeed = loc.getSpeed();
+                vehicleSpeed = (int) loc.getSpeed();
+                vehicleSpeed = 50;
                 TomTomResponse responseObj = TomTomUtil.getTomTomResponse(loc.getLatitude(),loc.getLongitude());
                 String speedLim = responseObj.getSpeedLimit();
                 String speedL = speedLim.substring(0,speedLim.indexOf("."));
                 speedLimit = Integer.parseInt(speedL);
+                if(speedLimit==0){
+                    speedLimit=20;
+                }
                 if (isSpeedIllegal(vehicleSpeed)) {
                     doBeep();
                     doVibrate();
                     flashLED();
+                    insertSpeedViolationInfo(speedLimit,vehicleSpeed);
                 } else if (isSpeedNearWarning(vehicleSpeed)) {
                     doBeep();
                 }
@@ -69,6 +85,43 @@ public class SpeedCheckTask extends AsyncTask {
             }
         }
         return null;
+    }
+
+    private void insertSpeedViolationInfo(int speedLimit, double vehicleSpeed) {
+
+        SharedPreferences prefs = this.activity.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
+        int userId = prefs.getInt("userId",0);
+        Statement stmt = null;
+        Connection conn= null;
+        Date currTime = Calendar.getInstance().getTime();
+        java.sql.Timestamp sqlDate = new java.sql.Timestamp(currTime.getTime());
+        double lat = 0.0;
+        double lon = 0.0;
+        String violationType = "Speeding";
+        if (ActivityCompat.checkSelfPermission(this.activity,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }else {
+            Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            lat = loc.getLatitude();
+            lon = loc.getLongitude();
+        }
+
+
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            stmt = conn.createStatement();
+            conn.setAutoCommit(false);
+            stmt.executeUpdate("INSERT INTO pavlokdb.trip_detail(trip_id,user_id,violation_type,speed_limit,vehicle_speed,latitude,longitude) VALUES('"+tripId+"','"+userId+"','"+violationType+"','"+speedLimit+"','"+vehicleSpeed+"','"+lat+"','"+lon+"')");
+            conn.commit();
+            conn.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private boolean isSpeedNearWarning(double speed) {
