@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     MyLocationListener.flag = false;
-                    SpeedCheckTask task = new SpeedCheckTask(authCode,locationManager,MainActivity.this);
+                    SpeedCheckTask task = new SpeedCheckTask(authCode,locationManager,MainActivity.this,tripId);
                     task.execute();
                 }
             });
@@ -306,7 +306,6 @@ public class MainActivity extends AppCompatActivity {
 
     private int insertSourceInfo(String startAddr, String startSubDiv, String startLat, String startLong, Date startTime) {
         Statement stmt = null;
-        boolean status=false;
         Connection conn= null;
         java.sql.Timestamp sqlDate = new java.sql.Timestamp(startTime.getTime());
         int tripId = 0;
@@ -324,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                 tripId = rs.getInt(1);
             }
             conn.commit();
-
+            conn.close();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -347,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
             conn.setAutoCommit(false);
             stmt.executeUpdate("update pavlokdb.trip_summary set destination_addr='"+destAddr+"',trip_end_dt='"+sqlDate+"',dest_subdiv='"+destSubDiv+"',dest_lat='"+destLat+"',dest_long='"+destLong+"' where trip_id = "+tripId);
             conn.commit();
+            conn.close();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {

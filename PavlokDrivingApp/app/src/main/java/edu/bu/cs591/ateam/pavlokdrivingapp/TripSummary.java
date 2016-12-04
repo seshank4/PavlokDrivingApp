@@ -29,6 +29,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -50,8 +51,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
     // TODO: import infractions!
     // load lat/long points into array to place pointers on map
-    final static double[][] INFRACTIONS = { {42.359002, -71.178088}, {42.363133, -71.142637}, {42.351294, -71.105314} };
-
+    //final static double[][] INFRACTIONS = { {42.359002, -71.178088}, {42.363133, -71.142637}, {42.351294, -71.105314} };
+    private ArrayList<ArrayList<Double>> infractions;
 
     private GoogleMap mMap;
     private CameraUpdate camUpdate;
@@ -92,10 +93,12 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
-//        tvTitle = (TextView)findViewById(R.id.tvTitle);
+        populateInfractions(tripId);
+       // tvTitle = (TextView)findViewById(R.id.tvTitle);
+
         btnReload = (Button)findViewById(R.id.btnReload);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        ll = new MyLocationListener();
+       // ll = new MyLocationListener();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -108,6 +111,32 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 //                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
 //            }
 //        });
+    }
+
+    private void populateInfractions(int tripId) {
+
+        Connection conn = null;
+        infractions = new ArrayList<>();
+        try {
+            int infractionsCount = 0;
+            Class.forName("com.mysql.jdbc.Driver");
+
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT latitude,longitude FROM pavlokdb.trip_detail WHERE trip_id = '"+tripId+"'");
+            if (rs.next()) {
+                ArrayList<Double> location = new ArrayList<>();
+                location.add(rs.getDouble("latitude"));
+                location.add(rs.getDouble("longitude"));
+                infractions.add(location);
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void getSourceDestLoc(int tripId) throws SQLException {
@@ -154,21 +183,21 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         Log.i(MYTAG, "onResume Called, Requesting Location Updates");
         try {
             // requestLocationUpdates required to initialize map fragment
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0.0f, ll);
-            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 300000, 0.0f, ll);
+            //lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0.0f, ll);
+            //lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 300000, 0.0f, ll);
         }catch(SecurityException e){
 
         }
     }
 
-    //INNER CLASS.
+    /*//INNER CLASS.
     class MyLocationListener implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
             float lat = (float) location.getLatitude();
             float lon = (float) location.getLongitude();
 
-//            float[] resultsReturn = {-1.0f};
+            //float[] resultsReturn = {-1.0f};
             Location lastLocation = null;
             try {
                 lastLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -177,10 +206,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
             if (lastLocation != null) {  //ref: http://stackoverflow.com/questions/13814928/getlastknownlocation-from-network-provider-on-phone-returns-null
                 LatLng prevLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-//                location.distanceBetween(prevLatLng.latitude, prevLatLng.longitude, lat, lon, resultsReturn);
+                //location.distanceBetween(prevLatLng.latitude, prevLatLng.longitude, lat, lon, resultsReturn);
             }
 
-            gotoLocation(cLat, cLong, 12);
+           // gotoLocation(cLat, cLong, 12);
             Log.i(MYTAG, "Location Has Changed. (" + lat + ", " + lon + ")");
         }
 
@@ -197,7 +226,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         public void onProviderDisabled(String provider) {
             Log.i(MYTAG, "Location Provider Has been ENabled. " + provider);
         }
-    }
+    }*/
 
     //----this is what happens when a language (Java) doesn't have default parms! icky... --------//
 //    void gotoLocation(double aLat, double aLong) {
@@ -232,15 +261,15 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
         // Center the map view on the calculated center-point, with a default zoom level of 12
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
-//        LatLng start = new LatLng(START[0], START[1]);
-//        LatLng end = new LatLng(END[0], END[1]);
+        //LatLng start = new LatLng(START[0], START[1]);
+        //LatLng end = new LatLng(END[0], END[1]);
 
         // Add a green marker on the map with the starting location
         mMap.addMarker(new MarkerOptions().position(start).title("Starting point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).draggable(false));
 
         // Add orange markers on the map for each infraction, labeled in order of occurrence
-        for (int i = 0; i < INFRACTIONS.length; i++) {
-            LatLng point = new LatLng(INFRACTIONS[i][0], INFRACTIONS[i][1]);
+        for (int i = 0; i < infractions.size(); i++) {
+            LatLng point = new LatLng(infractions.get(i).get(0), infractions.get(i).get(1));
             mMap.addMarker(new MarkerOptions().position(point).title("Infraction " + i).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).draggable(false));
         }
 
