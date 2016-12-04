@@ -59,7 +59,7 @@ public class SpeedCheckTask extends AsyncTask {
             while (!stopTrip) {
                 Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 vehicleSpeed = (int) loc.getSpeed();
-                vehicleSpeed = 50;
+                //vehicleSpeed = 50;
                 TomTomResponse responseObj = TomTomUtil.getTomTomResponse(loc.getLatitude(),loc.getLongitude());
                 String speedLim = responseObj.getSpeedLimit();
                 String speedL = speedLim.substring(0,speedLim.indexOf("."));

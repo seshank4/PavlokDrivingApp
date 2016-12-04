@@ -29,6 +29,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -50,8 +51,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
     // TODO: import infractions!
     // load lat/long points into array to place pointers on map
-    final static double[][] INFRACTIONS = { {42.359002, -71.178088}, {42.363133, -71.142637}, {42.351294, -71.105314} };
-
+    //final static double[][] INFRACTIONS = { {42.359002, -71.178088}, {42.363133, -71.142637}, {42.351294, -71.105314} };
+    private ArrayList<ArrayList<Double>> infractions;
 
     private GoogleMap mMap;
     private CameraUpdate camUpdate;
@@ -91,7 +92,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        populateInfractions(tripId);
        // tvTitle = (TextView)findViewById(R.id.tvTitle);
         btnReload = (Button)findViewById(R.id.btnReload);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -108,6 +109,32 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 //                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
 //            }
 //        });
+    }
+
+    private void populateInfractions(int tripId) {
+
+        Connection conn = null;
+        infractions = new ArrayList<>();
+        try {
+            int infractionsCount = 0;
+            Class.forName("com.mysql.jdbc.Driver");
+
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT latitude,longitude FROM pavlokdb.trip_detail WHERE trip_id = '"+tripId+"'");
+            if (rs.next()) {
+                ArrayList<Double> location = new ArrayList<>();
+                location.add(rs.getDouble("latitude"));
+                location.add(rs.getDouble("longitude"));
+                infractions.add(location);
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void getSourceDestLoc(int tripId) throws SQLException {
@@ -239,8 +266,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(start).title("Starting point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).draggable(false));
 
         // Add orange markers on the map for each infraction, labeled in order of occurrence
-        for (int i = 0; i < INFRACTIONS.length; i++) {
-            LatLng point = new LatLng(INFRACTIONS[i][0], INFRACTIONS[i][1]);
+        for (int i = 0; i < infractions.size(); i++) {
+            LatLng point = new LatLng(infractions.get(i).get(0), infractions.get(i).get(1));
             mMap.addMarker(new MarkerOptions().position(point).title("Infraction " + i).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).draggable(false));
         }
 
