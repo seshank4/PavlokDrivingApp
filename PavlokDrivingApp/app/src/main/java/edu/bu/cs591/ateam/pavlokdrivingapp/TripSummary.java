@@ -92,10 +92,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
-        tvTitle = (TextView)findViewById(R.id.tvTitle);
+       // tvTitle = (TextView)findViewById(R.id.tvTitle);
         btnReload = (Button)findViewById(R.id.btnReload);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        ll = new MyLocationListener();
+       // ll = new MyLocationListener();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -154,14 +154,14 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         Log.i(MYTAG, "onResume Called, Requesting Location Updates");
         try {
             // requestLocationUpdates required to initialize map fragment
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0.0f, ll);
-            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 300000, 0.0f, ll);
+            //lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0.0f, ll);
+            //lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 300000, 0.0f, ll);
         }catch(SecurityException e){
 
         }
     }
 
-    //INNER CLASS.
+    /*//INNER CLASS.
     class MyLocationListener implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
@@ -180,7 +180,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 //                location.distanceBetween(prevLatLng.latitude, prevLatLng.longitude, lat, lon, resultsReturn);
             }
 
-            gotoLocation(cLat, cLong, 12);
+           // gotoLocation(cLat, cLong, 12);
             Log.i(MYTAG, "Location Has Changed. (" + lat + ", " + lon + ")");
         }
 
@@ -197,7 +197,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         public void onProviderDisabled(String provider) {
             Log.i(MYTAG, "Location Provider Has been ENabled. " + provider);
         }
-    }
+    }*/
 
     //----this is what happens when a language (Java) doesn't have default parms! icky... --------//
 //    void gotoLocation(double aLat, double aLong) {
@@ -231,7 +231,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Center the map view on the calculated center-point, with a default zoom level of 12
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 12));
 //        LatLng start = new LatLng(START[0], START[1]);
 //        LatLng end = new LatLng(END[0], END[1]);
 
