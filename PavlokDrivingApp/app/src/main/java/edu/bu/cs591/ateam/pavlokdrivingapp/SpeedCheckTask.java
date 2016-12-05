@@ -67,9 +67,11 @@ public class SpeedCheckTask extends AsyncTask {
                 //vehicleSpeed = 50;
                 TomTomResponse responseObj = TomTomUtil.getTomTomResponse(loc.getLatitude(),loc.getLongitude());
                 Log.d("Frequent TomTom", "Calling tomtom api frequient");
-                String speedLim = responseObj.getSpeedLimit();
-                String speedL = speedLim.substring(0,speedLim.indexOf("."));
-                speedLimit = Integer.parseInt(speedL);
+                if(null != responseObj) {
+                    String speedLim = responseObj.getSpeedLimit();
+                    String speedL = speedLim.substring(0, speedLim.indexOf("."));
+                    speedLimit = Integer.parseInt(speedL);
+                }
                 if(speedLimit==0){
                     speedLimit=20;
                 }
@@ -260,7 +262,7 @@ public class SpeedCheckTask extends AsyncTask {
             e.printStackTrace();
         }
 
-        System.out.println(connection.getResponseCode());
+       // System.out.println(connection.getResponseCode());
 
     }
 
