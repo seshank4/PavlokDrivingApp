@@ -36,7 +36,7 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
             holder = new ViewHolder();
             holder.tvSource = (TextView)convertView.findViewById(R.id.tvSource);
             holder.tvDestination = (TextView)convertView.findViewById(R.id.tvDestination);
-            holder.tvTripTime = (TextView)convertView.findViewById(R.id.tvTripID);
+            holder.tvTripTime = (TextView)convertView.findViewById(R.id.tvTripTime);
             convertView.setTag(holder);
             convertView.setTag(holder);
         }
