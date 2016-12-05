@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
-        //prefs.edit().putInt("userId",0).apply();
         String acode = prefs.getString("code","");
         if(!acode.equals("")){
             this.code = acode;
@@ -112,16 +111,10 @@ public class MainActivity extends AppCompatActivity {
 
         final Button btn = (Button)findViewById(R.id.btnOauthTest);
         final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
-        //btnTomTom = (Button) findViewById(R.id.btnTomTom);
-
-//        Button summary = (Button)findViewById(R.id.btnSummary);
         Bundle bundle = getIntent().getExtras();
         boolean isRedirect = false;
         if(bundle != null) {
             isRedirect = bundle.getBoolean("isRedirect");
-            /*if(bundle.getString("code") !=null && !bundle.getString("code").equals("")) {
-                this.code = bundle.getString("code");
-            }*/
         }
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
@@ -195,12 +188,19 @@ public class MainActivity extends AppCompatActivity {
 //                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 0, vehicleSpeedLL);
                         Location sourceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-                        double sourceLat = sourceLocation.getLatitude();
-                        double sourceLong = sourceLocation.getLongitude();
+                        double sourceLat = 0.0;
+                        double sourceLong = 0.0;
+                        if(sourceLocation != null) {
+                            sourceLat = sourceLocation.getLatitude();
+                            sourceLong = sourceLocation.getLongitude();
+                        }
                         TomTomResponse responseObj = TomTomUtil.getTomTomResponse(sourceLat,sourceLong);
-                        String startAddr = responseObj.getFreeformAddress();
-                        String startSubDiv = responseObj.getMunicipalitySubdivision();
+                        String startAddr = "";
+                        String startSubDiv = "";
+                        if(responseObj != null) {
+                            startAddr = responseObj.getFreeformAddress();
+                            startSubDiv = responseObj.getMunicipalitySubdivision();
+                        }
                         Date startTime = Calendar.getInstance().getTime();
                         int tripId =  insertSourceInfo(startAddr,startSubDiv,String.valueOf(sourceLat),String.valueOf(sourceLong),startTime);
                         setTripId(tripId);
@@ -211,12 +211,6 @@ public class MainActivity extends AppCompatActivity {
                     task.execute();
                 }
             });
-
-           /* summary.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                }
-            });*/
 
             stopBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -240,8 +234,10 @@ public class MainActivity extends AppCompatActivity {
                             String destAddr = "";
                             String destSubDiv = "";
                             Date endTime = null;
-                            destAddr = responseObj.getFreeformAddress();
-                            destSubDiv = responseObj.getMunicipalitySubdivision();
+                            if(null != responseObj) {
+                                destAddr = responseObj.getFreeformAddress();
+                                destSubDiv = responseObj.getMunicipalitySubdivision();
+                            }
                             endTime = Calendar.getInstance().getTime();
                             int tripId = getTripId();
                             insertDestInfo(destAddr,destSubDiv,String.valueOf(destLat),String.valueOf(destLong),endTime,tripId);
@@ -337,8 +333,6 @@ public class MainActivity extends AppCompatActivity {
         Connection conn= null;
         java.sql.Timestamp sqlDate = new java.sql.Timestamp(destTime.getTime());
         int userId=0;
-//        SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
-//        int destTripId = prefs.getInt("tripId",0);
         try {
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
