@@ -20,12 +20,6 @@
             android:layout_weight="5"
             />
 
-        <Button
-            android:text="@string/reload_map"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnReload" />
-
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"

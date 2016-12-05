@@ -8,8 +8,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
@@ -49,10 +54,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     LatLng start;
     LatLng end;
 
-    // TODO: import infractions!
-    // load lat/long points into array to place pointers on map
-    //final static double[][] INFRACTIONS = { {42.359002, -71.178088}, {42.363133, -71.142637}, {42.351294, -71.105314} };
     private ArrayList<ArrayList<Double>> infractions;
+    private int counter = 0;
 
     private GoogleMap mMap;
     private CameraUpdate camUpdate;
@@ -62,18 +65,16 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     private LocationListener ll;
     Date tripStartTime;
     Date tripEndTime;
-    String sourceAddr="";
+    String sourceAddr = "";
     String destAddr = "";
-    String sourceSubDiv="";
-    String destSubDiv="";
+    String sourceSubDiv = "";
+    String destSubDiv = "";
 
     double sourceLat = 0.0;
     double sourceLong = 0.0;
     double destLat = 0.0;
     double destLong = 0.0;
 
-//    TextView tvTitle;
-    Button btnReload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +84,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
         Bundle bundle = getIntent().getExtras();
         int tripId = 0;
-        if(bundle != null){
+        if (bundle != null) {
             tripId = bundle.getInt("tripId");
         }
 
@@ -94,23 +95,17 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         }
 
         populateInfractions(tripId);
-       // tvTitle = (TextView)findViewById(R.id.tvTitle);
 
-        btnReload = (Button)findViewById(R.id.btnReload);
+        // Create listview of infraction data
+        ListView lvSummary = (ListView) findViewById(R.id.lvSummary);
+        lvSummary.setAdapter(new MyCustomTripAdapter(this, infractions));
+
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-       // ll = new MyLocationListener();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-
-//        btnReload.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
-//            }
-//        });
     }
 
     private void populateInfractions(int tripId) {
@@ -123,11 +118,14 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT latitude,longitude FROM pavlokdb.trip_detail WHERE trip_id = '"+tripId+"'");
+            ResultSet rs = stmt.executeQuery("SELECT latitude,longitude,speed_limit,vehicle_speed FROM pavlokdb.trip_detail WHERE trip_id = '" + tripId + "'");
             while (rs.next()) {
+                counter += 1;
                 ArrayList<Double> location = new ArrayList<>();
                 location.add(rs.getDouble("latitude"));
                 location.add(rs.getDouble("longitude"));
+                location.add(rs.getDouble("speed_limit"));
+                location.add(rs.getDouble("vehicle_speed"));
                 infractions.add(location);
             }
 
@@ -146,10 +144,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT trip_start_dt,trip_end_dt,source_addr,source_subdiv,source_lat,source_long,destination_addr,dest_subdiv,dest_lat,dest_long FROM pavlokdb.trip_summary WHERE trip_id = '"+tripId+"'");
+            ResultSet rs = stmt.executeQuery("SELECT trip_start_dt,trip_end_dt,source_addr,source_subdiv,source_lat,source_long,destination_addr,dest_subdiv,dest_lat,dest_long FROM pavlokdb.trip_summary WHERE trip_id = '" + tripId + "'");
             if (rs.next()) {
-                tripStartTime=rs.getDate("trip_start_dt");
-                tripEndTime=rs.getDate("trip_end_dt");
+                tripStartTime = rs.getDate("trip_start_dt");
+                tripEndTime = rs.getDate("trip_end_dt");
                 sourceAddr = rs.getString("source_addr");
                 destAddr = rs.getString("destination_addr");
                 sourceSubDiv = rs.getString("source_subdiv");
@@ -164,8 +162,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
                 end = new LatLng(destLat, destLong);
 
                 // FIND CENTER POINT
-                cLat = (sourceLat + destLat)/2;
-                cLong = (sourceLong + destLong)/2;
+                cLat = (sourceLat + destLat) / 2;
+                cLong = (sourceLong + destLong) / 2;
                 CENTER = new LatLng(cLat, cLong);
             }
         } catch (ClassNotFoundException e) {
@@ -181,71 +179,26 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         Log.i(MYTAG, "onResume Called, Requesting Location Updates");
-        try {
-            // requestLocationUpdates required to initialize map fragment
-            //lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0.0f, ll);
-            //lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 300000, 0.0f, ll);
-        }catch(SecurityException e){
-
-        }
+//        try {
+//            // requestLocationUpdates required to initialize map fragment
+//            //lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0.0f, ll);
+//            //lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 300000, 0.0f, ll);
+//        }catch(SecurityException e){
+//
+//        }
     }
-
-    /*//INNER CLASS.
-    class MyLocationListener implements LocationListener {
-        @Override
-        public void onLocationChanged(Location location) {
-            float lat = (float) location.getLatitude();
-            float lon = (float) location.getLongitude();
-
-            //float[] resultsReturn = {-1.0f};
-            Location lastLocation = null;
-            try {
-                lastLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            } catch (SecurityException e) {
-            }
-
-            if (lastLocation != null) {  //ref: http://stackoverflow.com/questions/13814928/getlastknownlocation-from-network-provider-on-phone-returns-null
-                LatLng prevLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                //location.distanceBetween(prevLatLng.latitude, prevLatLng.longitude, lat, lon, resultsReturn);
-            }
-
-           // gotoLocation(cLat, cLong, 12);
-            Log.i(MYTAG, "Location Has Changed. (" + lat + ", " + lon + ")");
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.i(MYTAG, "Location Provider Status Has Changed. " + provider);
-        }
-
-        public void onProviderEnabled(String provider) {
-            Log.i(MYTAG, "Location Provider Has been DISabled. " + provider);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            Log.i(MYTAG, "Location Provider Has been ENabled. " + provider);
-        }
-    }*/
 
     //----this is what happens when a language (Java) doesn't have default parms! icky... --------//
-//    void gotoLocation(double aLat, double aLong) {
-//        gotoLocation(aLat, aLong, 12, "BU Headquarters");
+
+//    void gotoLocation(double aLat, double aLong, int aZoom) {
+//        gotoLocation(aLat, aLong, aZoom, "BU Headquarters");
 //    }
 
-    void gotoLocation(double aLat, double aLong, int aZoom) {
-        gotoLocation(aLat, aLong, aZoom, "BU Headquarters");
-    }
-
-//    void gotoLocation(double aLat, double aLong, String aStrLoc) {
-//        gotoLocation(aLat, aLong, 12, aStrLoc);
+//    void gotoLocation(double aLat, double aLong, int aZoom, String aStrLoc) {
+//        LatLng latLng = new LatLng(aLat, aLong);
+//        camUpdate = CameraUpdateFactory.newLatLngZoom(latLng, aZoom);
+//        mMap.animateCamera(camUpdate);
 //    }
-
-    void gotoLocation(double aLat, double aLong, int aZoom, String aStrLoc) {
-        LatLng latLng = new LatLng(aLat, aLong);
-        camUpdate = CameraUpdateFactory.newLatLngZoom(latLng, aZoom);
-        mMap.animateCamera(camUpdate);
-    }
 
     /**
      * Manipulates the map once available.
@@ -261,21 +214,19 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
         // Center the map view on the calculated center-point, with a default zoom level of 12
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
-        //LatLng start = new LatLng(START[0], START[1]);
-        //LatLng end = new LatLng(END[0], END[1]);
+        Log.i(MYTAG, "Center point: " + CENTER.toString());
 
         // Add a green marker on the map with the starting location
-        mMap.addMarker(new MarkerOptions().position(start).title("Starting point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).draggable(false));
+        mMap.addMarker(new MarkerOptions().position(start).title("Starting point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).draggable(false).snippet("Nearest address: " + sourceAddr));
 
         // Add orange markers on the map for each infraction, labeled in order of occurrence
         for (int i = 0; i < infractions.size(); i++) {
             LatLng point = new LatLng(infractions.get(i).get(0), infractions.get(i).get(1));
-            mMap.addMarker(new MarkerOptions().position(point).title("Infraction " + i).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).draggable(false));
+            mMap.addMarker(new MarkerOptions().position(point).title("Infraction " + i).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).draggable(false).snippet("Speed limit: " + infractions.get(i).get(2) + "mph, Your speed: " + infractions.get(i).get(3) + "mph"));
         }
 
         // Add a red marker on the map with the destination location
-        mMap.addMarker(new MarkerOptions().position(end).title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).draggable(false));
-//        Log.i(MYTAG, "Center point: " + CENTER.toString());
+        mMap.addMarker(new MarkerOptions().position(end).title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).draggable(false).snippet("Nearest address: " + destAddr));
     }
 
     @Override
@@ -315,3 +266,53 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         client.disconnect();
     }
 }
+
+
+// Custom Adapter for displaying trip summary information by infraction #
+class MyCustomTripAdapter extends BaseAdapter {
+    private static ArrayList<ArrayList<Double>> infractions;
+    private LayoutInflater mInflater;
+
+    public MyCustomTripAdapter(Context context, ArrayList<ArrayList<Double>> results) {
+        infractions = results;
+        mInflater = LayoutInflater.from(context);
+    }
+
+    public int getCount() {
+        return infractions.size();
+    }
+
+    public Object getItem(int position) {
+        return infractions.get(position);
+    }
+
+    public long getItemId(int position) {
+        return position;
+    }
+
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.listview_row_trip_summary, null);
+            holder = new ViewHolder();
+            holder.tvNum = (TextView)convertView.findViewById(R.id.tvNum);
+            holder.tvLimit2 = (TextView)convertView.findViewById(R.id.tvLimit2);
+            holder.tvSpeed2 = (TextView)convertView.findViewById(R.id.tvSpeed2);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder)convertView.getTag();
+        }
+        holder.tvNum.setText(position);
+        holder.tvLimit2.setText(String.valueOf(infractions.get(position).get(2)));
+        holder.tvSpeed2.setText(String.valueOf(infractions.get(position).get(3)));
+
+        return convertView;
+    }
+
+    static class ViewHolder {
+        TextView tvNum;
+        TextView tvLimit2;
+        TextView tvSpeed2;
+    }
+}
+

@@ -39,7 +39,7 @@
         <item>85</item>
         <item>90</item>
     </array>
-    <string name="title_activity_trip_summary">Map</string>
+    <string name="title_activity_trip_summary">Trip Summary</string>
     <string name="username_email">Username/Email</string>
     <string name="password">Password</string>
     <string name="sign_up">Sign Up</string>
