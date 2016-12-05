@@ -2,28 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="2dp"
-    android:layout_marginTop="2dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="3">
+        android:layout_height="wrap_content"
+        android:layout_weight="5">
 
         <TextView
-            android:text="tvNum"
+            android:text="TextView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:id="@+id/tvNum"
-            android:textSize="30sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvSumStop"
+            tools:text="End Point"
+            android:textSize="18sp"
             android:textStyle="normal|bold"
             android:gravity="center_vertical|center_horizontal"
-            android:background="@android:color/holo_orange_dark" />
-
+            android:background="@android:color/holo_red_dark" />
     </LinearLayout>
 
     <LinearLayout
@@ -36,46 +32,47 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="5">
 
             <TextView
-                android:text="Speed Limit: "
+                android:text="Nearest Address:"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/tvLimit1"
-                android:layout_weight="1"
+                android:id="@+id/tvStopAddr"
+                android:textSize="14sp"
                 android:textStyle="normal|bold" />
 
             <TextView
-                android:text="tvLimit2"
-                android:layout_width="wrap_content"
+                android:text="tvStopA2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/tvLimit2"
-                android:layout_weight="14" />
+                android:id="@+id/tvStopA2"
+                android:layout_marginLeft="5dp" />
+
         </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="5">
 
             <TextView
-                android:text="Your speed:"
+                android:text="TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/tvSpeed1"
-                android:textStyle="normal|bold"
-                android:layout_weight="1"
-                tools:text="Your Speed:  " />
+                android:id="@+id/tvStopTime1"
+                tools:text="Time Ended:"
+                android:textStyle="normal|bold" />
 
             <TextView
-                android:text="tvSpeed2"
+                android:text="tvStopTime2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/tvSpeed2"
-                android:layout_weight="14" />
+                android:id="@+id/tvStopTime2"
+                android:layout_marginLeft="5dp" />
         </LinearLayout>
-
     </LinearLayout>
 
 </LinearLayout>

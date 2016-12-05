@@ -29,6 +29,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.w3c.dom.Text;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -37,6 +39,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static java.lang.String.valueOf;
 
 /**
  *  various pieces of code taken from previous homework assignments,
@@ -96,9 +100,9 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
         populateInfractions(tripId);
 
-        // Create listview of infraction data
+        // Create list view of infraction data
         ListView lvSummary = (ListView) findViewById(R.id.lvSummary);
-        lvSummary.setAdapter(new MyCustomTripAdapter(this, infractions));
+        lvSummary.setAdapter(new MyCustomTripAdapter(this, infractions, tripStartTime, tripEndTime, sourceAddr, destAddr));
 
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -179,26 +183,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         Log.i(MYTAG, "onResume Called, Requesting Location Updates");
-//        try {
-//            // requestLocationUpdates required to initialize map fragment
-//            //lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 0.0f, ll);
-//            //lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 300000, 0.0f, ll);
-//        }catch(SecurityException e){
-//
-//        }
     }
 
-    //----this is what happens when a language (Java) doesn't have default parms! icky... --------//
-
-//    void gotoLocation(double aLat, double aLong, int aZoom) {
-//        gotoLocation(aLat, aLong, aZoom, "BU Headquarters");
-//    }
-
-//    void gotoLocation(double aLat, double aLong, int aZoom, String aStrLoc) {
-//        LatLng latLng = new LatLng(aLat, aLong);
-//        camUpdate = CameraUpdateFactory.newLatLngZoom(latLng, aZoom);
-//        mMap.animateCamera(camUpdate);
-//    }
 
     /**
      * Manipulates the map once available.
@@ -272,14 +258,23 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 class MyCustomTripAdapter extends BaseAdapter {
     private static ArrayList<ArrayList<Double>> infractions;
     private LayoutInflater mInflater;
+    Date sTime;
+    Date eTime;
+    String sAddr;
+    String eAddr;
 
-    public MyCustomTripAdapter(Context context, ArrayList<ArrayList<Double>> results) {
+    public MyCustomTripAdapter(Context context, ArrayList<ArrayList<Double>> results,
+                               Date startTime, Date endTime, String startAddr, String endAddr) {
         infractions = results;
+        sTime = startTime;
+        eTime = endTime;
+        sAddr = startAddr;
+        eAddr = endAddr;
         mInflater = LayoutInflater.from(context);
     }
 
     public int getCount() {
-        return infractions.size();
+        return infractions.size()+2;
     }
 
     public Object getItem(int position) {
@@ -291,20 +286,63 @@ class MyCustomTripAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
+        ViewStart starter;
         ViewHolder holder;
-        if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.listview_row_trip_summary, null);
-            holder = new ViewHolder();
-            holder.tvNum = (TextView)convertView.findViewById(R.id.tvNum);
-            holder.tvLimit2 = (TextView)convertView.findViewById(R.id.tvLimit2);
-            holder.tvSpeed2 = (TextView)convertView.findViewById(R.id.tvSpeed2);
-            convertView.setTag(holder);
+        ViewStop stopper;
+
+        /*
+            For the first item in the list view, use 'listview_row_trip_summary_start' layout to
+            display the Start-of-trip information.
+         */
+        if (position == 0){
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.listview_row_trip_summary_start, parent, false);
+                starter = new ViewStart();
+                starter.tvStartA2 = (TextView)convertView.findViewById(R.id.tvStartA2);
+                starter.tvStartTime2 = (TextView)convertView.findViewById(R.id.tvStartTime2);
+                convertView.setTag(starter);
+            } else {
+                starter = (ViewStart)convertView.getTag();
+            }
+            starter.tvStartA2.setText(sAddr);
+            starter.tvStartTime2.setText(valueOf(sTime));
+
+            /*
+                For the last item in the list view, use 'listview_row_trip_summary_stop' layout
+                to display the End-of-trip information.
+             */
+        } else if (position == getCount()) {
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.listview_row_trip_summary_stop, parent, false);
+                stopper = new ViewStop();
+                stopper.tvStopA2 = (TextView)convertView.findViewById(R.id.tvStopA2);
+                stopper.tvStopTime2 = (TextView)convertView.findViewById(R.id.tvStopTime2);
+                convertView.setTag(stopper);
+            } else {
+                stopper = (ViewStop)convertView.getTag();
+            }
+            stopper.tvStopA2.setText(eAddr);
+            stopper.tvStopTime2.setText(valueOf(eTime));
+
+            /*
+                All infractions are displayed using the 'listview_row_trip_summary' layout, with
+                each infraction in order corresponding with the map markers.
+             */
         } else {
-            holder = (ViewHolder)convertView.getTag();
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.listview_row_trip_summary, null);
+                holder = new ViewHolder();
+                holder.tvNum = (TextView)convertView.findViewById(R.id.tvNum);
+                holder.tvLimit2 = (TextView)convertView.findViewById(R.id.tvLimit2);
+                holder.tvSpeed2 = (TextView)convertView.findViewById(R.id.tvSpeed2);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder)convertView.getTag();
+            }
+            holder.tvNum.setText(position);
+            holder.tvLimit2.setText(valueOf(infractions.get(position).get(2)));
+            holder.tvSpeed2.setText(valueOf(infractions.get(position).get(3)));
         }
-        holder.tvNum.setText(position);
-        holder.tvLimit2.setText(String.valueOf(infractions.get(position).get(2)));
-        holder.tvSpeed2.setText(String.valueOf(infractions.get(position).get(3)));
 
         return convertView;
     }
@@ -313,6 +351,16 @@ class MyCustomTripAdapter extends BaseAdapter {
         TextView tvNum;
         TextView tvLimit2;
         TextView tvSpeed2;
+    }
+
+    static class ViewStart {
+        TextView tvStartA2;
+        TextView tvStartTime2;
+    }
+
+    static class ViewStop {
+        TextView tvStopA2;
+        TextView tvStopTime2;
     }
 }
 
