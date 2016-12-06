@@ -117,7 +117,9 @@ public class MainActivity extends AppCompatActivity {
         if(bundle != null) {
             isRedirect = bundle.getBoolean("isRedirect");
             isFromHistory = bundle.getBoolean("isFromHistory");
-            userTrips = bundle.getParcelableArrayList("userTrips");
+            if(null != bundle.getParcelableArrayList("userTrips")) {
+                userTrips = bundle.getParcelableArrayList("userTrips");
+            }
         }
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
