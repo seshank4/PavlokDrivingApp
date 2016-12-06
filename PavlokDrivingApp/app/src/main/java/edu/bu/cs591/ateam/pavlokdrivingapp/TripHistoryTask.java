@@ -20,8 +20,12 @@ public class TripHistoryTask extends AsyncTask {
     Activity activity;
     private ArrayList<Trip> userTrips;
 
+    public static boolean isAuthorized;
+
     TripHistoryTask(Activity activity){
         this.activity = activity;
+        isAuthorized = false;
+
     }
 
     @Override
@@ -56,6 +60,7 @@ public class TripHistoryTask extends AsyncTask {
 
     @Override
     protected void onPostExecute(Object o) {
+
         Intent intent = new Intent(this.activity,MainActivity.class);
         intent.putExtra("userTrips", userTrips);
         intent.putExtra("isRedirect",true);

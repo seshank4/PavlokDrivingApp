@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     GPS_REQUEST_CODE);
+            TripHistoryTask.isAuthorized = false;
         }
 
         final Button btn = (Button)findViewById(R.id.btnOauthTest);
@@ -144,7 +145,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        if(!isFromHistory){
+        if(!isFromHistory && TripHistoryTask.isAuthorized){
+            TripHistoryTask.isAuthorized = false;
             TripHistoryTask tripHistoryTask = new TripHistoryTask(MainActivity.this);
             tripHistoryTask.execute();
         }
@@ -454,6 +456,7 @@ public class MainActivity extends AppCompatActivity {
             SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
             if(this.code != null && !this.code.equals("")) {
                 prefs.edit().putString("code", this.code).commit();
+                TripHistoryTask.isAuthorized = true;
             }
             startActivity(intent);
     }
