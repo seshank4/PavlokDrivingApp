@@ -37,6 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -150,6 +151,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT trip_start_dt,trip_end_dt,source_addr,source_subdiv,source_lat,source_long,destination_addr,dest_subdiv,dest_lat,dest_long FROM pavlokdb.trip_summary WHERE trip_id = '" + tripId + "'");
             if (rs.next()) {
+
+
                 tripStartTime = rs.getDate("trip_start_dt");
                 tripEndTime = rs.getDate("trip_end_dt");
                 sourceAddr = rs.getString("source_addr");
@@ -258,10 +261,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 class MyCustomTripAdapter extends BaseAdapter {
     private static ArrayList<ArrayList<Double>> infractions;
     private LayoutInflater mInflater;
-    Date sTime;
-    Date eTime;
-    String sAddr;
-    String eAddr;
+    private Date sTime;
+    private Date eTime;
+    private String sAddr;
+    private String eAddr;
 
     public MyCustomTripAdapter(Context context, ArrayList<ArrayList<Double>> results,
                                Date startTime, Date endTime, String startAddr, String endAddr) {
@@ -271,6 +274,18 @@ class MyCustomTripAdapter extends BaseAdapter {
         sAddr = startAddr;
         eAddr = endAddr;
         mInflater = LayoutInflater.from(context);
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 3;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) {return 0;}
+        if (position == getCount()-1) {return 2;}
+        else {return 1; }
     }
 
     public int getCount() {
@@ -286,66 +301,76 @@ class MyCustomTripAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewStart starter;
-        ViewHolder holder;
-        ViewStop stopper;
 
-        /*
-            For the first item in the list view, use 'listview_row_trip_summary_start' layout to
-            display the Start-of-trip information.
-         */
-        if (position == 0){
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.listview_row_trip_summary_start, parent, false);
-                starter = new ViewStart();
-                starter.tvStartA2 = (TextView)convertView.findViewById(R.id.tvStartA2);
-                starter.tvStartTime2 = (TextView)convertView.findViewById(R.id.tvStartTime2);
-                convertView.setTag(starter);
-            } else {
-                starter = (ViewStart)convertView.getTag();
-            }
-            starter.tvStartA2.setText(sAddr);
-            starter.tvStartTime2.setText(valueOf(sTime));
+        Log.i("PAVLOK COUNT", valueOf(getCount()));
+        Log.i("PAVLOK POSITION", valueOf(position));
+        int type = this.getItemViewType(position);
+        Log.i("PAVLOK TYPE", valueOf(type));
+        switch (type){
+            /*
+             *  For the first item in the list view, use 'listview_row_trip_summary_start' layout to
+             *  display the Start-of-trip information.
+             */
+            case 0:
+                ViewStart starter;
+                if (convertView == null) {
+                    convertView = mInflater.inflate(R.layout.listview_row_trip_summary_start, parent, false);
+                    starter = new ViewStart();
+                    starter.tvStartA2 = (TextView)convertView.findViewById(R.id.tvStartA2);
+                    starter.tvStartTime2 = (TextView)convertView.findViewById(R.id.tvStartTime2);
+                    convertView.setTag(starter);
+                } else {
+                    starter = (ViewStart)convertView.getTag();
+                }
+                starter.tvStartA2.setText(sAddr);
+                starter.tvStartTime2.setText(valueOf(sTime));
+                return convertView;
 
             /*
-                For the last item in the list view, use 'listview_row_trip_summary_stop' layout
-                to display the End-of-trip information.
+             *  All infractions are displayed using the 'listview_row_trip_summary' layout, with
+             *  each infraction in order corresponding with the map markers.
              */
-        } else if (position == getCount()) {
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.listview_row_trip_summary_stop, parent, false);
-                stopper = new ViewStop();
-                stopper.tvStopA2 = (TextView)convertView.findViewById(R.id.tvStopA2);
-                stopper.tvStopTime2 = (TextView)convertView.findViewById(R.id.tvStopTime2);
-                convertView.setTag(stopper);
-            } else {
-                stopper = (ViewStop)convertView.getTag();
-            }
-            stopper.tvStopA2.setText(eAddr);
-            stopper.tvStopTime2.setText(valueOf(eTime));
+            case 1:
+                ViewHolder holder;
+                if (convertView == null) {
+                    convertView = mInflater.inflate(R.layout.listview_row_trip_summary, null);
+                    holder = new ViewHolder();
+                    holder.tvNum = (TextView)convertView.findViewById(R.id.tvNum);
+                    holder.tvLimit2 = (TextView)convertView.findViewById(R.id.tvLimit2);
+                    holder.tvSpeed2 = (TextView)convertView.findViewById(R.id.tvSpeed2);
+                    convertView.setTag(holder);
+                } else {
+                    holder = (ViewHolder)convertView.getTag();
+                }
+                holder.tvNum.setText(String.valueOf(position-1));
+                holder.tvLimit2.setText(valueOf(infractions.get(position-1).get(2)));
+                holder.tvSpeed2.setText(valueOf(infractions.get(position-1).get(3)));
+                return convertView;
 
             /*
-                All infractions are displayed using the 'listview_row_trip_summary' layout, with
-                each infraction in order corresponding with the map markers.
+             *  For the last item in the list view, use 'listview_row_trip_summary_stop' layout
+             *  to display the End-of-trip information.
              */
-        } else {
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.listview_row_trip_summary, null);
-                holder = new ViewHolder();
-                holder.tvNum = (TextView)convertView.findViewById(R.id.tvNum);
-                holder.tvLimit2 = (TextView)convertView.findViewById(R.id.tvLimit2);
-                holder.tvSpeed2 = (TextView)convertView.findViewById(R.id.tvSpeed2);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder)convertView.getTag();
+            case 2:
+                ViewStop stopper;
+                if (convertView == null) {
+                    convertView = mInflater.inflate(R.layout.listview_row_trip_summary_stop, parent, false);
+                    stopper = new ViewStop();
+                    stopper.tvStopA2 = (TextView)convertView.findViewById(R.id.tvStopA2);
+                    stopper.tvStopTime2 = (TextView)convertView.findViewById(R.id.tvStopTime2);
+                    convertView.setTag(stopper);
+                } else {
+                    stopper = (ViewStop)convertView.getTag();
+                }
+                stopper.tvStopA2.setText(eAddr);
+                stopper.tvStopTime2.setText(valueOf(eTime));
+                return convertView;
+
+            default:
+                // unknown data type
+                throw new UnsupportedOperationException("Unknown data type");
             }
-            holder.tvNum.setText(position);
-            holder.tvLimit2.setText(valueOf(infractions.get(position).get(2)));
-            holder.tvSpeed2.setText(valueOf(infractions.get(position).get(3)));
         }
-
-        return convertView;
-    }
 
     static class ViewHolder {
         TextView tvNum;

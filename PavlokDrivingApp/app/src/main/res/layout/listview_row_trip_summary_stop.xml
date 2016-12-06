@@ -11,15 +11,15 @@
         android:layout_weight="5">
 
         <TextView
-            android:text="TextView"
-            android:layout_width="match_parent"
+            android:text="End Point"
+            android:layout_width="64dp"
             android:layout_height="wrap_content"
             android:id="@+id/tvSumStop"
             tools:text="End Point"
             android:textSize="18sp"
             android:textStyle="normal|bold"
             android:gravity="center_vertical|center_horizontal"
-            android:background="@android:color/holo_red_dark" />
+            android:background="@android:color/holo_red_light" />
     </LinearLayout>
 
     <LinearLayout
@@ -27,7 +27,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_gravity="center_vertical">
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="5dp">
 
         <LinearLayout
             android:orientation="horizontal"
