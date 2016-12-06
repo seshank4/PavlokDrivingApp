@@ -2,19 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="2dp"
-    android:layout_marginTop="2dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="3">
+        android:layout_width="wrap_content">
 
         <TextView
-            android:text="tvNum"
-            android:layout_width="match_parent"
+            android:text="tvN"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
@@ -22,7 +18,8 @@
             android:textSize="30sp"
             android:textStyle="normal|bold"
             android:gravity="center_vertical|center_horizontal"
-            android:background="@android:color/holo_orange_dark" />
+            android:background="@android:color/holo_orange_dark"
+            android:layout_width="64dp" />
 
     </LinearLayout>
 
@@ -30,8 +27,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_gravity="center_vertical">
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="5dp">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -40,7 +37,7 @@
 
             <TextView
                 android:text="Speed Limit: "
-                android:layout_width="wrap_content"
+                android:layout_width="75dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvLimit1"
                 android:layout_weight="1"
@@ -61,7 +58,7 @@
 
             <TextView
                 android:text="Your speed:"
-                android:layout_width="wrap_content"
+                android:layout_width="75dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvSpeed1"
                 android:textStyle="normal|bold"
