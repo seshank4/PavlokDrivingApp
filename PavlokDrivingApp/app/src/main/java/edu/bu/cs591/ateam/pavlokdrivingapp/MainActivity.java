@@ -55,6 +55,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -79,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
     private GoogleApiClient mGoogleApiClient;
 
 
-
     //Tomtom
     private LocationManager locationManager;
     private LocationListener locationListener = null;
@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
         String acode = prefs.getString("code","");
@@ -113,8 +112,12 @@ public class MainActivity extends AppCompatActivity {
         final Button stopBtn = (Button)findViewById(R.id.btnStopTrip);
         Bundle bundle = getIntent().getExtras();
         boolean isRedirect = false;
+        boolean isFromHistory = false;
+        ArrayList<Trip> userTrips = new ArrayList<>();
         if(bundle != null) {
             isRedirect = bundle.getBoolean("isRedirect");
+            isFromHistory = bundle.getBoolean("isFromHistory");
+            userTrips = bundle.getParcelableArrayList("userTrips");
         }
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
@@ -122,7 +125,13 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        if(!isFromHistory){
+            TripHistoryTask tripHistoryTask = new TripHistoryTask(MainActivity.this);
+            tripHistoryTask.execute();
+        }
+
         if(!isRedirect) {
+
             //isRedirect = false;
             String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
             Uri uri = Uri.parse(page);
@@ -163,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         final LinearLayout activity_main = (LinearLayout) findViewById(R.id.activity_main);
-
             final String authCode =this.code;
             btn.setOnClickListener(new View.OnClickListener() {
 
@@ -248,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("location", "removed updates successfulyy");
                     }
                 }
+
             });
 
             mDrawerList = (ListView) findViewById(R.id.navList);
@@ -292,6 +301,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+//    private void getTripHistory() {
+//        SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
+//        int userId = prefs.getInt("userId",0);
+//        Connection conn = null;
+//        //userTrips = new ArrayList<>();
+//        try {
+//            int infractionsCount = 0;
+//            Class.forName("com.mysql.jdbc.Driver");
+//            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+//            Statement stmt = conn.createStatement();
+//            conn.setAutoCommit(false);
+//            ResultSet rs = stmt.executeQuery("SELECT trip_id,source_addr,destination_addr FROM pavlokdb.trip_summary WHERE user_id = '" + tripId + "'");
+//            while (rs.next()) {
+//                Trip userTrip = new Trip();
+//                userTrip.setTripId(rs.getInt("trip_id"));
+//                userTrip.setSource(rs.getString("source_addr"));
+//                userTrip.setSource(rs.getString("destination_addr"));
+//                userTrip.setTripStartDate(rs.getDate("trip_start_dt"));
+//                //userTrips.add(userTrip);
+//            }
+//
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
+
     private int getTripId() {
         return this.tripId;
     }
@@ -332,7 +370,6 @@ public class MainActivity extends AppCompatActivity {
         Statement stmt = null;
         Connection conn= null;
         java.sql.Timestamp sqlDate = new java.sql.Timestamp(destTime.getTime());
-        int userId=0;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");

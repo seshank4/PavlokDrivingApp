@@ -47,21 +47,17 @@ public class LoginTask extends AsyncTask{
                     prefs.edit().putInt("userId", rs1.getInt(1)).commit();
 
                 }
+                conn.close();
                 //MainActivity.userId =  rs1.getInt("user_id");
             }
             else {
                 login = false;
+                conn.close();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        }finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }

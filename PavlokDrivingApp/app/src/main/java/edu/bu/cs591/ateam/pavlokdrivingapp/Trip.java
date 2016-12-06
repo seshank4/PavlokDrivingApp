@@ -1,14 +1,41 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.Date;
+
 /**
  * Created by sesha on 12/5/2016.
  */
 
-public class Trip {
+public class Trip implements Parcelable {
 
     private String source;
     private String destination;
     private int tripId;
+    private String tripStartDate;
+
+    public Trip() {
+
+    }
+
+    private Trip(Parcel in) {
+        source = in.readString();
+        destination = in.readString();
+        tripId = in.readInt();
+        tripStartDate = in.readString();
+    }
+
+    public String getTripStartDate() {
+        return tripStartDate;
+    }
+
+    public void setTripStartDate(String tripStartDate) {
+        this.tripStartDate = tripStartDate;
+    }
+
+
 
     public String getSource() {
         return source;
@@ -33,4 +60,28 @@ public class Trip {
     public void setTripId(int tripId) {
         this.tripId = tripId;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(source);
+        dest.writeString(destination);
+        dest.writeInt(tripId);
+        dest.writeString(String.valueOf(tripStartDate));
+    }
+
+    public static final Parcelable.Creator<Trip> CREATOR = new Parcelable.Creator<Trip>() {
+        public Trip createFromParcel(Parcel in) {
+            return new Trip(in);
+        }
+
+        public Trip[] newArray(int size) {
+            return new Trip[size];
+
+        }
+    };
 }
