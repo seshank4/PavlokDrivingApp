@@ -48,7 +48,14 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
         }
         Trip trip = (Trip)trips.get(position);
         holder.tvSource.setText(trip.getSource().substring(0,trip.getSource().indexOf(",")));
-        holder.tvDestination.setText(trip.getDestination().substring(0,trip.getDestination().indexOf(",")));
+        if(trip.getDestination() == null){
+            holder.tvDestination.setText("Destination");
+        }
+        else if(trip.getDestination()!=null && trip.getDestination().contains(",")) {
+            holder.tvDestination.setText(trip.getDestination().substring(0, trip.getDestination().indexOf(",")));
+        }else{
+            holder.tvDestination.setText(trip.getDestination().substring(0,10).concat("...."));
+        }
         holder.tvTripTime.setText(trip.getTripStartDate());
         holder.tvToText.setText(" To ");
         return convertView;
