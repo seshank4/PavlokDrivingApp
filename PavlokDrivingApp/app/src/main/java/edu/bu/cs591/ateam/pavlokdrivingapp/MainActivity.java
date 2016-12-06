@@ -93,6 +93,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
         String acode = prefs.getString("code","");
         if(!acode.equals("")){
@@ -152,8 +155,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(!isRedirect) {
-
-            //isRedirect = false;
             String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
             Uri uri = Uri.parse(page);
             WebView webView = new WebView(MainActivity.this);
@@ -322,35 +323,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    private void getTripHistory() {
-//        SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
-//        int userId = prefs.getInt("userId",0);
-//        Connection conn = null;
-//        //userTrips = new ArrayList<>();
-//        try {
-//            int infractionsCount = 0;
-//            Class.forName("com.mysql.jdbc.Driver");
-//            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
-//            Statement stmt = conn.createStatement();
-//            conn.setAutoCommit(false);
-//            ResultSet rs = stmt.executeQuery("SELECT trip_id,source_addr,destination_addr FROM pavlokdb.trip_summary WHERE user_id = '" + tripId + "'");
-//            while (rs.next()) {
-//                Trip userTrip = new Trip();
-//                userTrip.setTripId(rs.getInt("trip_id"));
-//                userTrip.setSource(rs.getString("source_addr"));
-//                userTrip.setSource(rs.getString("destination_addr"));
-//                userTrip.setTripStartDate(rs.getDate("trip_start_dt"));
-//                //userTrips.add(userTrip);
-//            }
-//
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
     private int getTripId() {
         return this.tripId;
     }
@@ -477,7 +449,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onLocationChanged(Location location) {
-            //SpeedCheckTask.vehicleSpeed = location.getSpeed();
+            
         }
 
         @Override

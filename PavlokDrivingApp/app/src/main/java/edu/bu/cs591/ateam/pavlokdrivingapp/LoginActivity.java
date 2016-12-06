@@ -1,6 +1,7 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import android.content.Intent;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -26,6 +27,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         final EditText uName = (EditText) findViewById(R.id.etUserName);
         final EditText password = (EditText) findViewById(R.id.etPassword);

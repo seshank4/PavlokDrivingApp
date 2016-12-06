@@ -13,7 +13,10 @@
         android:launchMode="singleInstance"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+
 
         <intent-filter>
             <action android:name="android.intent.action.VIEW" />
@@ -24,7 +27,9 @@
             <data android:scheme="pavlok-bu-cs591" />
         </intent-filter>
 
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -47,7 +52,9 @@
 
         <activity
             android:name=".TripSummary"
-            android:label="Trip Summary">
+            android:label="Trip Summary"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.bu.cs591.ateam.pavlokdrivingapp.MainActivity" />
