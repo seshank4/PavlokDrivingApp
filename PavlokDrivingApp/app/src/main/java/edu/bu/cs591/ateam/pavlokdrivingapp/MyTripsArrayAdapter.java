@@ -47,14 +47,27 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
             holder = (ViewHolder)convertView.getTag();
         }
         Trip trip = (Trip)trips.get(position);
-        holder.tvSource.setText(trip.getSource().substring(0,trip.getSource().indexOf(",")));
+        if(trip.getSource() == null) {
+            holder.tvSource.setText("Source");
+        }else if(trip.getSource()!=null && trip.getSource().contains(",")) {
+            holder.tvSource.setText(trip.getSource().substring(0, trip.getSource().indexOf(",")));
+        }else{
+            if(trip.getSource().length()>=11) {
+                holder.tvSource.setText(trip.getSource().substring(0, 10).concat("...."));
+            }else{
+                holder.tvSource.setText(trip.getSource());
+            }
+        }
         if(trip.getDestination() == null){
             holder.tvDestination.setText("Destination");
-        }
-        else if(trip.getDestination()!=null && trip.getDestination().contains(",")) {
+        }else if(trip.getDestination()!=null && trip.getDestination().contains(",")) {
             holder.tvDestination.setText(trip.getDestination().substring(0, trip.getDestination().indexOf(",")));
         }else{
-            holder.tvDestination.setText(trip.getDestination().substring(0,10).concat("...."));
+            if(trip.getDestination().length()>=11) {
+                holder.tvDestination.setText(trip.getDestination().substring(0, 10).concat("...."));
+            }else{
+                holder.tvDestination.setText(trip.getDestination());
+            }
         }
         holder.tvTripTime.setText(trip.getTripStartDate());
         holder.tvToText.setText(" To ");

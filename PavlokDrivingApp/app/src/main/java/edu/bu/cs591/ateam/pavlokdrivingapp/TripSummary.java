@@ -6,6 +6,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -86,6 +87,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
         Log.i(MYTAG, "onCreate Called.");
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
 
         Bundle bundle = getIntent().getExtras();
         int tripId = 0;
@@ -178,7 +183,9 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            conn.close();
+            if(null != conn) {
+                conn.close();
+            }
         }
     }
 
@@ -202,7 +209,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Center the map view on the calculated center-point, with a default zoom level of 12
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 12));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 14));
         Log.i(MYTAG, "Center point: " + CENTER.toString());
 
         // Add a green marker on the map with the starting location

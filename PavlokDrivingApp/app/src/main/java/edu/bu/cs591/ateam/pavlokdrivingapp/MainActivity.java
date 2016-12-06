@@ -121,10 +121,24 @@ public class MainActivity extends AppCompatActivity {
                 userTrips = bundle.getParcelableArrayList("userTrips");
             }
         }
-
+        final ArrayList<Trip> tripList = userTrips;
         ListView lvMain = (ListView) findViewById(R.id.lvTrips);
         lvMain.setAdapter(new MyTripsArrayAdapter(this, userTrips));
+        lvMain.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener(){
 
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Trip trip = tripList.get(position);
+                int tid = 0;
+                if(null != trip){
+                   tid = trip.getTripId();
+                }
+                Intent intent = new Intent(MainActivity.this, TripSummary.class);
+                intent.putExtra("tripId", tid);
+                startActivity(intent);
+            }
+        });
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
