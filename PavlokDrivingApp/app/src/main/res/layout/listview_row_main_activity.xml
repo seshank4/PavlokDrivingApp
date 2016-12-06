@@ -6,39 +6,65 @@
 
     <TextView
         android:text="TextView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvTripTime"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:textSize="17sp" />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clickable="false">
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/tvSource"
-            android:layout_weight="1" />
+            android:layout_weight="1">
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvToText"
-            android:layout_weight="1"
-            tools:text="To"
-            android:textAlignment="center" />
+            <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tvSource"
+                android:layout_weight="1"
+                android:textSize="15sp" />
+        </LinearLayout>
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/tvDestination"
-            android:layout_weight="1"
-            android:textAlignment="viewEnd" />
+            android:layout_weight="1.5">
+
+            <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tvToText"
+                android:layout_weight="1"
+                tools:text="To"
+                android:textAlignment="center"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tvDestination"
+                android:layout_weight="1"
+                android:textSize="15sp" />
+        </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

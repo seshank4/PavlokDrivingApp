@@ -41,7 +41,7 @@ public class TripHistoryTask extends AsyncTask {
                 Trip userTrip = new Trip();
                 userTrip.setTripId(rs.getInt("trip_id"));
                 userTrip.setSource(rs.getString("source_addr"));
-                userTrip.setSource(rs.getString("destination_addr"));
+                userTrip.setDestination(rs.getString("destination_addr"));
                 userTrip.setTripStartDate(String.valueOf(rs.getDate("trip_start_dt")));
                 userTrips.add(userTrip);
             }

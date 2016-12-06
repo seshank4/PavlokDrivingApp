@@ -122,6 +122,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        ListView lvMain = (ListView) findViewById(R.id.lvTrips);
+        lvMain.setAdapter(new MyTripsArrayAdapter(this, userTrips));
+
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

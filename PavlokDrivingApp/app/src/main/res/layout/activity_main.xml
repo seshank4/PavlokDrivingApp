@@ -52,7 +52,9 @@
                 android:layout_width="@dimen/main_btn_size"
                 android:layout_height="@dimen/main_btn_size"
                 android:id="@+id/btnOauthTest"
-                android:background="@drawable/round_button" />
+                android:background="@drawable/round_button"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
 
             <Button
                 android:text="@string/stop_trip"
@@ -60,9 +62,21 @@
                 android:layout_height="@dimen/main_btn_size"
                 android:id="@+id/btnStopTrip"
                 android:visibility="invisible"
-                android:background="@drawable/round_button_stop" />
+                android:background="@drawable/round_button_stop"
+                android:textSize="20sp"
+                android:textColor="@android:color/white" />
 
         </RelativeLayout>
+
+        <TextView
+            android:text="Your Trip History "
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:id="@+id/textView"
+            android:textSize="24sp"
+            android:gravity="center_vertical|center_horizontal"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white" />
 
         <LinearLayout
             android:orientation="vertical"
@@ -75,6 +89,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/lvTrips" />
         </LinearLayout>
+
     </LinearLayout>
 
     <ListView

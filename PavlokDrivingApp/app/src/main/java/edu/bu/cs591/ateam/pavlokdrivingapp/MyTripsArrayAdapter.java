@@ -23,7 +23,8 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
     public MyTripsArrayAdapter(Context context, List<Trip> trips)
     {
         super(context,0,trips);
-        trips = trips;
+        this.trips = (ArrayList<Trip>) trips;
+        mInflater = LayoutInflater.from(context);
     }
 
     @NonNull
@@ -37,6 +38,7 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
             holder.tvSource = (TextView)convertView.findViewById(R.id.tvSource);
             holder.tvDestination = (TextView)convertView.findViewById(R.id.tvDestination);
             holder.tvTripTime = (TextView)convertView.findViewById(R.id.tvTripTime);
+            holder.tvToText= (TextView)convertView.findViewById(R.id.tvToText);
             convertView.setTag(holder);
             convertView.setTag(holder);
         }
@@ -45,9 +47,10 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
             holder = (ViewHolder)convertView.getTag();
         }
         Trip trip = (Trip)trips.get(position);
-        holder.tvSource.setText(trip.getSource());
-        holder.tvDestination.setText(trip.getDestination());
-        holder.tvTripTime.setText(trip.getTripId());
+        holder.tvSource.setText(trip.getSource().substring(0,trip.getSource().indexOf(",")));
+        holder.tvDestination.setText(trip.getDestination().substring(0,trip.getDestination().indexOf(",")));
+        holder.tvTripTime.setText(trip.getTripStartDate());
+        holder.tvToText.setText(" To ");
         return convertView;
     }
 
@@ -56,6 +59,7 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
         private TextView tvSource;
         private TextView tvDestination;
         private TextView tvTripTime;
+        private TextView tvToText;
 
     }
 }
