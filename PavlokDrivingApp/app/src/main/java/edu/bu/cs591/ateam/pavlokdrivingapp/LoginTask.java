@@ -47,6 +47,9 @@ public class LoginTask extends AsyncTask{
                     prefs.edit().putInt("userId", rs1.getInt(1)).commit();
 
                 }
+
+                prefs.edit().putString("username", params[0].toString()).commit();
+                prefs.edit().putString("password", params[1].toString()).commit();
                 conn.close();
                 //MainActivity.userId =  rs1.getInt("user_id");
             }
