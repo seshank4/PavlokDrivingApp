@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -41,6 +42,7 @@ public class SpeedCheckTask extends AsyncTask {
     private LocationManager locationManager;
     private Activity activity;
     private int tripId;
+    private ArrayList<Location> routeTrace = new ArrayList<>();
 
     public SpeedCheckTask(String code, LocationManager locationManager,Activity activity,int tripId){
         this.locationManager = locationManager;
@@ -59,6 +61,7 @@ public class SpeedCheckTask extends AsyncTask {
         }else {
             while (!stopTrip) {
                 Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                routeTrace.add(loc);
                 TomTomResponse responseObj = null;
                 if(loc != null) {
                     vehicleSpeed = loc.getSpeed();
@@ -151,7 +154,23 @@ public class SpeedCheckTask extends AsyncTask {
 
     @Override
     protected void onPostExecute(Object o) {
-
+        for(Location loc : routeTrace) {
+            Statement stmt = null;
+            Connection conn = null;
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+                stmt = conn.createStatement();
+                conn.setAutoCommit(false);
+                stmt.executeUpdate("INSERT INTO pavlokdb.trip_route(trip_id,lat,lon) VALUES('" + tripId + "'," + loc.getLatitude() + "','" + loc.getLongitude() + "')");
+                conn.commit();
+                conn.close();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
         super.onPostExecute(o);
     }
 

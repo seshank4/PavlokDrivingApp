@@ -1,6 +1,7 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -29,9 +30,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.w3c.dom.Text;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -80,6 +83,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     double sourceLong = 0.0;
     double destLat = 0.0;
     double destLong = 0.0;
+    private ArrayList<LatLng> routeTrace = new ArrayList<>();
 
 
     @Override
@@ -105,7 +109,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         }
 
         populateInfractions(tripId);
-
+        getRouteTrace(tripId);
         // Create list view of infraction data
         ListView lvSummary = (ListView) findViewById(R.id.lvSummary);
         lvSummary.setAdapter(new MyCustomTripAdapter(this, infractions, tripStartTime, tripEndTime, sourceAddr, destAddr));
@@ -116,6 +120,25 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    private void getRouteTrace(int tripId) {
+        Connection conn = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT lat,lon FROM pavlokdb.trip_route WHERE trip_id = '" + tripId + "'");
+            while (rs.next()) {
+                routeTrace.add(new LatLng(rs.getDouble("lat"),rs.getDouble("lon")));
+            }
+        }catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void populateInfractions(int tripId) {
@@ -223,6 +246,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
         // Add a red marker on the map with the destination location
         mMap.addMarker(new MarkerOptions().position(end).title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).draggable(false).snippet("Nearest address: " + destAddr));
+        PolylineOptions lineOptions = new PolylineOptions();
+        lineOptions.addAll(routeTrace);
+        lineOptions.width(5).color(Color.WHITE);
+        mMap.addPolyline(lineOptions);
     }
 
     @Override
