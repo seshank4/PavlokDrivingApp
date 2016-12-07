@@ -261,8 +261,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         // Add a red marker on the map with the destination location
         mMap.addMarker(new MarkerOptions().position(end).title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).draggable(false).snippet("Nearest address: " + destAddr));
         PolylineOptions lineOptions = new PolylineOptions();
-        lineOptions.addAll(routeTrace);
-        lineOptions.width(5).color(Color.WHITE);
+        for(LatLng latLng : routeTrace) {
+            lineOptions.add(latLng);
+        }
+        lineOptions.width(10).color(Color.RED);
         mMap.addPolyline(lineOptions);
     }
 

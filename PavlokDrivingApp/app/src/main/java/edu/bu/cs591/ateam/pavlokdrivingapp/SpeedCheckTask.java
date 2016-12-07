@@ -69,6 +69,7 @@ public class SpeedCheckTask extends AsyncTask {
                     responseObj = TomTomUtil.getTomTomResponse(loc.getLatitude(),loc.getLongitude());
                 }
                 Log.d("Spped", "Current speed is " + String.valueOf(vehicleSpeed));
+                Log.d("Spped", "speed limit is " + String.valueOf(speedLimit));
                 Log.d("Frequent TomTom", "Calling tomtom api frequient");
                 if(null != responseObj) {
                     String speedLim = responseObj.getSpeedLimit();
@@ -136,7 +137,7 @@ public class SpeedCheckTask extends AsyncTask {
     }
 
     private boolean isSpeedNearWarning(double speed) {
-
+        Log.d("Spped", "Current speed is " + String.valueOf(vehicleSpeed));
         if(speed>=speedLimit-5){
             return true;
         }
@@ -266,7 +267,7 @@ public class SpeedCheckTask extends AsyncTask {
             e.printStackTrace();
         }
 
-       // System.out.println(connection.getResponseCode());
+       Log.i("pavres",String.valueOf(connection.getResponseCode()));
 
     }
 
