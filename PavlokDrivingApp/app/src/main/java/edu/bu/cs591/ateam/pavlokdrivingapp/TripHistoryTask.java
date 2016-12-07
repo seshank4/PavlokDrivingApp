@@ -14,18 +14,18 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
+ * Async task to get the complete Trip history of the logged in user.
+ * This is a heavy network intensive task and hence runs on a separate thread
  * Created by karun on 12/5/2016.
  */
 public class TripHistoryTask extends AsyncTask {
     Activity activity;
     private ArrayList<Trip> userTrips;
-
     public static boolean isAuthorized;
 
     TripHistoryTask(Activity activity){
         this.activity = activity;
         isAuthorized = false;
-
     }
 
     @Override
@@ -49,7 +49,6 @@ public class TripHistoryTask extends AsyncTask {
                 userTrip.setTripStartDate(String.valueOf(rs.getDate("trip_start_dt")));
                 userTrips.add(userTrip);
             }
-
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -60,7 +59,6 @@ public class TripHistoryTask extends AsyncTask {
 
     @Override
     protected void onPostExecute(Object o) {
-
         Intent intent = new Intent(this.activity,MainActivity.class);
         intent.putExtra("userTrips", userTrips);
         intent.putExtra("isRedirect",true);

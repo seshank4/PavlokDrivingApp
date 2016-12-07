@@ -10,6 +10,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
+ * Aync task that saves the route coordinates data to the database to be used later in
+ * the trip summary page to show the route on google map.
  * Created by karun on 12/6/2016.
  */
 public class RouteInsertTask extends AsyncTask {
@@ -17,6 +19,7 @@ public class RouteInsertTask extends AsyncTask {
     protected Object doInBackground(Object[] params) {
 
         int tripId = (Integer) params[0];
+        //ArrayList with all the coordinates which represent the entire route of a trip
         ArrayList<Location> routeLocList = (ArrayList<Location>) params[1];
 
         if(routeLocList!=null){
@@ -42,8 +45,6 @@ public class RouteInsertTask extends AsyncTask {
                 e.printStackTrace();
             }
         }
-
         return null;
-
     }
 }

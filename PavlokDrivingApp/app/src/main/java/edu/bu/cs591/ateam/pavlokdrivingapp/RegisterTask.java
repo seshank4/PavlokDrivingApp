@@ -11,13 +11,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * Async Task that performs user registration.
+ */
 public class RegisterTask extends AsyncTask {
 
     Activity activity = null;
     boolean userAlreadyExists = false;
     boolean registered = false;
 
-    RegisterTask(Activity activity){
+    RegisterTask(Activity activity) {
         this.activity = activity;
     }
 
@@ -25,49 +28,44 @@ public class RegisterTask extends AsyncTask {
     protected Object doInBackground(Object[] params) {
         Statement stmt = null;
         Statement stmt1 = null;
-        boolean status=false;
-        int count=0;
-        Connection conn= null;
-
+        boolean status = false;
+        int count = 0;
+        Connection conn = null;
         String firstName = params[0].toString();
         String lastName = params[1].toString();
         String email = params[2].toString();
         String password = params[3].toString();
 
-
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306","ateam","theateam");
-
-
-        stmt1 = conn.createStatement();
-            ResultSet rs = stmt1.executeQuery("SELECT first_name FROM pavlokdb.users WHERE EMAIL = '"+email+"'");
-            if(rs.next()){
+            conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
+            stmt1 = conn.createStatement();
+            ResultSet rs = stmt1.executeQuery("SELECT first_name FROM pavlokdb.users WHERE EMAIL = '" + email + "'");
+            if (rs.next()) {
+                //If we reach here it means that the user is already registered with our app
                 userAlreadyExists = true;
                 registered = false;
-            }
-            else {
+            } else {
+                // new user so insert a record to database
                 try {
                     stmt = conn.createStatement();
-                    count = stmt.executeUpdate("INSERT INTO pavlokdb.users(first_name,last_name,email,password) VALUES('"+firstName+"','"+lastName+"','"+email+"','"+password+"')");
+                    count = stmt.executeUpdate("INSERT INTO pavlokdb.users(first_name,last_name,email,password) VALUES('" + firstName + "','" + lastName + "','" + email + "','" + password + "')");
 
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                if(count==1){
-                    Intent intent = new Intent(this.activity,LoginActivity.class);
+                if (count == 1) {
+                    //Insert was successful, Go Back to Login Activity to allow the user to login with the credentials just created
+                    Intent intent = new Intent(this.activity, LoginActivity.class);
                     activity.startActivity(intent);
                     registered = true;
-
-                }
-                else {
+                } else {
                     registered = false;
                 }
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             try {
@@ -75,22 +73,20 @@ public class RegisterTask extends AsyncTask {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
         }
-
-
-
-    return null;
+        return null;
     }
 
     @Override
     protected void onPostExecute(Object o) {
-        if(registered){
-            Toast toast = Toast.makeText(this.activity,"Registered successfully!",Toast.LENGTH_SHORT);
+        if (registered) {
+            //Notify user of a successful registration
+            Toast toast = Toast.makeText(this.activity, "Registered successfully!", Toast.LENGTH_SHORT);
             toast.show();
         }
-        if(userAlreadyExists){
-            Toast toast = Toast.makeText(this.activity,"This email is already registered.",Toast.LENGTH_SHORT);
+        if (userAlreadyExists) {
+            //Notify user of a failed registration
+            Toast toast = Toast.makeText(this.activity, "This email is already registered.", Toast.LENGTH_SHORT);
             toast.show();
         }
     }

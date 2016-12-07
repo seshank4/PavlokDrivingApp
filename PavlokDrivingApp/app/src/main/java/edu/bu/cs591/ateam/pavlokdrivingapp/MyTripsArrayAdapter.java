@@ -6,13 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Custom adapter for TripHistory List View
  * Created by sesha on 12/5/2016.
  */
 
@@ -48,16 +48,21 @@ public class MyTripsArrayAdapter extends ArrayAdapter {
         }
         Trip trip = (Trip)trips.get(position);
         if(trip.getSource() == null) {
+            //if the source is null for some reason
             holder.tvSource.setText("Source");
         }else if(trip.getSource()!=null && trip.getSource().contains(",")) {
+            //Address is too long to be shown in full on a mobile device.
             holder.tvSource.setText(trip.getSource().substring(0, trip.getSource().indexOf(",")));
         }else{
             if(trip.getSource().length()>=11) {
+                //Address is too long to be shown in full on a mobile device but does not have a ','
                 holder.tvSource.setText(trip.getSource().substring(0, 10).concat("...."));
             }else{
+                //address is short enough to be displayed well on a mobile device
                 holder.tvSource.setText(trip.getSource());
             }
         }
+        //same for destination address
         if(trip.getDestination() == null){
             holder.tvDestination.setText("Destination");
         }else if(trip.getDestination()!=null && trip.getDestination().contains(",")) {

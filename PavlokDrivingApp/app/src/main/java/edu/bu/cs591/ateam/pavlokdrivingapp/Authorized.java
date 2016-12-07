@@ -4,6 +4,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Created by sesha on 10/25/2016.
+ * Container for mapping JSON response from pavlok Oauth API
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Authorized {
