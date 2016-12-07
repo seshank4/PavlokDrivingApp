@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -84,6 +85,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     double destLat = 0.0;
     double destLong = 0.0;
     private ArrayList<LatLng> routeTrace = new ArrayList<>();
+    private ArrayList<Location> routeLocList = new ArrayList<>();
 
 
     @Override
@@ -93,7 +95,6 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         Log.i(MYTAG, "onCreate Called.");
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
         StrictMode.setThreadPolicy(policy);
 
         Bundle bundle = getIntent().getExtras();
@@ -109,7 +110,20 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         }
 
         populateInfractions(tripId);
-        getRouteTrace(tripId);
+
+        routeLocList = SpeedCheckTask.routeTrace;
+        SpeedCheckTask.routeTrace = null;
+        if(routeLocList!=null && routeLocList.size()>0){
+            routeTrace = new ArrayList<>();
+            for(Location loc:routeLocList){
+                routeTrace.add(new LatLng(loc.getLatitude(),loc.getLongitude()));
+            }
+            RouteInsertTask routeInsertTask = new RouteInsertTask();
+            routeInsertTask.execute(tripId,routeLocList);
+        } else {
+            getRouteTrace(tripId);
+        }
+
         // Create list view of infraction data
         ListView lvSummary = (ListView) findViewById(R.id.lvSummary);
         lvSummary.setAdapter(new MyCustomTripAdapter(this, infractions, tripStartTime, tripEndTime, sourceAddr, destAddr));
