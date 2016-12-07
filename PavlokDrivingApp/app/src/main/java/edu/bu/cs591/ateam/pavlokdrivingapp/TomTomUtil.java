@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * Utility class that has method to get the address information based on Lat Lon from TomTom API
  * Created by karun on 12/2/2016.
  */
 public class TomTomUtil {
@@ -21,14 +22,13 @@ public class TomTomUtil {
     private static String EXT = "json/"; // the extension of the response. (json, jsonp, js, or xml)
     private static String API_KEY = "h8fxx4ptxbtb4y7xv5r9x7ga";
 
-    public static TomTomResponse getTomTomResponse(double lat, double lon){
+    public static TomTomResponse getTomTomResponse(double lat, double lon) {
         final String string_url = "https://" + BASE_URL + "search/" + VERSION_NUMBER + "/reverseGeocode/" +
                 lat + "," + lon + "." + EXT + "?key=" + API_KEY + "&returnSpeedLimit=true"
                 + "&returnRoadUse=true" + "&roadUse=" + "[\"Arterial\"]";
         //StrictMode stuff has to be here because there was an error being thrown.
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
         // Creating the URL object to pass to the HTTP request function
         // must put in try catch since url may be invalid
         URL url = null;
@@ -37,32 +37,19 @@ public class TomTomUtil {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-        Log.e("in SpeedCheckTask.get",url.toString());
-//        Toast.makeText(context, "lat and long are" + longitude + "," + latitude, Toast.LENGTH_SHORT).show();
-
-        /*//sb variable is for testing
-        StringBuilder sb = new StringBuilder();
-        //pass url and sb to getHTTPConnection
-        sb = getHttpURLConnection(url,sb);*/
+        Log.e("in SpeedCheckTask.get", url.toString());
         HttpURLConnection connection;
         TomTomResponse responseObj = null;
         try {
             connection = (HttpURLConnection) url.openConnection();
-
-                ObjectMapper mapper = new ObjectMapper();
-
-                System.out.println(connection.getResponseCode());
-                //responseObj = mapper.readValue(connection.getInputStream(), TomTomResponse.class);
-                JsonNode node = mapper.readTree(connection.getInputStream());
-                JsonNode subNode = node.get("addresses").get(0).get("address");
-                responseObj = mapper.readValue(subNode, TomTomResponse.class);
-                // subNode.get("address")
-            } catch (IOException e) {
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(connection.getResponseCode());
+            JsonNode node = mapper.readTree(connection.getInputStream());
+            JsonNode subNode = node.get("addresses").get(0).get("address");
+            responseObj = mapper.readValue(subNode, TomTomResponse.class);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return responseObj;
     }
-
-
 }

@@ -13,9 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,19 +30,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import org.w3c.dom.Text;
-
-import java.io.IOException;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import static java.lang.String.valueOf;
 
@@ -98,10 +92,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary);
         Log.i(MYTAG, "onCreate Called.");
-
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
         Bundle bundle = getIntent().getExtras();
         int tripId = 0;
         if (bundle != null) {
@@ -120,53 +112,52 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         // Trace a line along the route driven
         routeLocList = SpeedCheckTask.routeTrace;
         SpeedCheckTask.routeTrace = null;
-        if(routeLocList!=null && routeLocList.size()>0){
+        if (routeLocList != null && routeLocList.size() > 0) {
             routeTrace = new ArrayList<>();
-            for(Location loc:routeLocList){
-                routeTrace.add(new LatLng(loc.getLatitude(),loc.getLongitude()));
+            for (Location loc : routeLocList) {
+                routeTrace.add(new LatLng(loc.getLatitude(), loc.getLongitude()));
             }
             RouteInsertTask routeInsertTask = new RouteInsertTask();
-            routeInsertTask.execute(tripId,routeLocList);
+            routeInsertTask.execute(tripId, routeLocList);
         } else {
             getRouteTrace(tripId);
         }
-
         // Create list view of infraction data
         ListView lvSummary = (ListView) findViewById(R.id.lvSummary);
         lvSummary.setAdapter(new MyCustomTripAdapter(this, infractions, tripStartTime, tripEndTime, sourceAddr, destAddr));
-
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    /* Call the database and return an ArrayList of all the (lat, long) pairs for this trip
-     * to trace a line highlighting the route driven
+
+    /**
+     * DB call to get the coordinate trace of the entire route for the current Trip.
+     * @param tripId
      */
     private void getRouteTrace(int tripId) {
         Connection conn = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT lat,lon FROM pavlokdb.trip_route WHERE trip_id = '" + tripId + "'");
             while (rs.next()) {
-                routeTrace.add(new LatLng(rs.getDouble("lat"),rs.getDouble("lon")));
+                routeTrace.add(new LatLng(rs.getDouble("lat"), rs.getDouble("lon")));
             }
-        }catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
-    /*  Call the database and return a nested ArrayList, containing the information associated
-        with each speeding infraction:  (lat, long, speed limit, vehicle speed)
+    /**
+     * Get the infractions of the current Trip from the database and save them to an ArrayList
+     * to be used for displaying the infractions on a google map
+     * @param tripId
      */
     private void populateInfractions(int tripId) {
 
@@ -175,7 +166,6 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         try {
             int infractionsCount = 0;
             Class.forName("com.mysql.jdbc.Driver");
-
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT latitude,longitude,speed_limit,vehicle_speed FROM pavlokdb.trip_detail WHERE trip_id = '" + tripId + "'");
@@ -188,18 +178,18 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
                 location.add(rs.getDouble("vehicle_speed"));
                 infractions.add(location);
             }
-
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
-    /*  Call the database and return the gps information for the starting and ending points
-        of the trip.
-        Using the start & end coords, calculate the center point of the map fragment
+
+    /**
+     * Get source and destination Location information from the Database
+     * @param tripId
+     * @throws SQLException
      */
     private void getSourceDestLoc(int tripId) throws SQLException {
         Connection conn = null;
@@ -210,10 +200,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT trip_start_dt,trip_end_dt,source_addr,source_subdiv,source_lat,source_long,destination_addr,dest_subdiv,dest_lat,dest_long FROM pavlokdb.trip_summary WHERE trip_id = '" + tripId + "'");
             if (rs.next()) {
-
-
-                tripStartTime = rs.getDate("trip_start_dt");
-                tripEndTime = rs.getDate("trip_end_dt");
+                tripStartTime = new Date(rs.getTimestamp("trip_start_dt").getTime());
+                tripEndTime = new Date(rs.getTimestamp("trip_end_dt").getTime());
                 sourceAddr = rs.getString("source_addr");
                 destAddr = rs.getString("destination_addr");
                 sourceSubDiv = rs.getString("source_subdiv");
@@ -222,12 +210,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
                 destLat = rs.getDouble("dest_lat");
                 sourceLong = rs.getDouble("source_long");
                 destLong = rs.getDouble("dest_long");
-
                 // Set start & end points
                 start = new LatLng(sourceLat, sourceLong);
                 end = new LatLng(destLat, destLong);
-
-                // FIND CENTER POINT
+                // Find center point of map fragment
                 cLat = (sourceLat + destLat) / 2;
                 cLong = (sourceLong + destLong) / 2;
                 CENTER = new LatLng(cLat, cLong);
@@ -237,7 +223,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if(null != conn) {
+            if (null != conn) {
                 conn.close();
             }
         }
@@ -261,25 +247,23 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         Log.i(MYTAG, "onMapReady Called.");
         mMap = googleMap;
-
         // Center the map view on the calculated center-point, with a default zoom level of 12
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER, 14));
         Log.i(MYTAG, "Center point: " + CENTER.toString());
-
         // Add a green marker on the map with the starting location
         mMap.addMarker(new MarkerOptions().position(start).title("Starting point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).draggable(false).snippet("Nearest address: " + sourceAddr));
-
         // Add orange markers on the map for each infraction, labeled in order of occurrence
         for (int i = 0; i < infractions.size(); i++) {
             LatLng point = new LatLng(infractions.get(i).get(0), infractions.get(i).get(1));
             mMap.addMarker(new MarkerOptions().position(point).title("Infraction " + i).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).draggable(false).snippet("Speed limit: " + infractions.get(i).get(2) + "mph, Your speed: " + infractions.get(i).get(3) + "mph"));
         }
-
         // Add a red marker on the map with the destination location
         mMap.addMarker(new MarkerOptions().position(end).title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).draggable(false).snippet("Nearest address: " + destAddr));
         PolylineOptions lineOptions = new PolylineOptions();
-        lineOptions.addAll(routeTrace);
-        lineOptions.width(5).color(Color.WHITE);
+        for (LatLng latLng : routeTrace) {
+            lineOptions.add(latLng);
+        }
+        lineOptions.width(10).color(Color.RED);
         mMap.addPolyline(lineOptions);
     }
 
@@ -299,7 +283,6 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
                 Uri.parse("android-app://edu.bu.cs591.ateam.pavlokdrivingapp/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
-
     }
 
     @Override
@@ -341,7 +324,7 @@ class MyCustomTripAdapter extends BaseAdapter {
         mInflater = LayoutInflater.from(context);
     }
 
-    /*
+    /**
      *  Must override getViewTypeCount() & getItemViewType() to implement multiple
      *  listViews in the listAdapter
      */
@@ -352,13 +335,18 @@ class MyCustomTripAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {return 0;}
-        if (position == getCount()-1) {return 2;}
-        else {return 1; }
+        if (position == 0) {
+            return 0;
+        }
+        if (position == getCount() - 1) {
+            return 2;
+        } else {
+            return 1;
+        }
     }
 
     public int getCount() {
-        return infractions.size()+2;
+        return infractions.size() + 2;
     }
 
     public Object getItem(int position) {
@@ -375,7 +363,7 @@ class MyCustomTripAdapter extends BaseAdapter {
         Log.i("PAVLOK POSITION", valueOf(position));
         int type = this.getItemViewType(position);
         Log.i("PAVLOK TYPE", valueOf(type));
-        switch (type){
+        switch (type) {
             /*
              *  For the first item in the list view, use 'listview_row_trip_summary_start' layout to
              *  display the Start-of-trip information.
@@ -385,14 +373,15 @@ class MyCustomTripAdapter extends BaseAdapter {
                 if (convertView == null) {
                     convertView = mInflater.inflate(R.layout.listview_row_trip_summary_start, parent, false);
                     starter = new ViewStart();
-                    starter.tvStartA2 = (TextView)convertView.findViewById(R.id.tvStartA2);
-                    starter.tvStartTime2 = (TextView)convertView.findViewById(R.id.tvStartTime2);
+                    starter.tvStartA2 = (TextView) convertView.findViewById(R.id.tvStartA2);
+                    starter.tvStartTime2 = (TextView) convertView.findViewById(R.id.tvStartTime2);
                     convertView.setTag(starter);
                 } else {
-                    starter = (ViewStart)convertView.getTag();
+                    starter = (ViewStart) convertView.getTag();
                 }
                 starter.tvStartA2.setText(sAddr);
-                starter.tvStartTime2.setText(valueOf(sTime));
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+                starter.tvStartTime2.setText(df.format(sTime));
                 return convertView;
 
             /*
@@ -404,18 +393,17 @@ class MyCustomTripAdapter extends BaseAdapter {
                 if (convertView == null) {
                     convertView = mInflater.inflate(R.layout.listview_row_trip_summary, null);
                     holder = new ViewHolder();
-                    holder.tvNum = (TextView)convertView.findViewById(R.id.tvNum);
-                    holder.tvLimit2 = (TextView)convertView.findViewById(R.id.tvLimit2);
-                    holder.tvSpeed2 = (TextView)convertView.findViewById(R.id.tvSpeed2);
+                    holder.tvNum = (TextView) convertView.findViewById(R.id.tvNum);
+                    holder.tvLimit2 = (TextView) convertView.findViewById(R.id.tvLimit2);
+                    holder.tvSpeed2 = (TextView) convertView.findViewById(R.id.tvSpeed2);
                     convertView.setTag(holder);
                 } else {
-                    holder = (ViewHolder)convertView.getTag();
+                    holder = (ViewHolder) convertView.getTag();
                 }
-                holder.tvNum.setText(String.valueOf(position-1));
-                holder.tvLimit2.setText(valueOf(infractions.get(position-1).get(2)));
-                holder.tvSpeed2.setText(valueOf(infractions.get(position-1).get(3)));
+                holder.tvNum.setText(String.valueOf(position - 1));
+                holder.tvLimit2.setText(valueOf(infractions.get(position - 1).get(2)));
+                holder.tvSpeed2.setText(valueOf(infractions.get(position - 1).get(3)));
                 return convertView;
-
             /*
              *  For the last item in the list view, use 'listview_row_trip_summary_stop' layout
              *  to display the End-of-trip information.
@@ -425,21 +413,21 @@ class MyCustomTripAdapter extends BaseAdapter {
                 if (convertView == null) {
                     convertView = mInflater.inflate(R.layout.listview_row_trip_summary_stop, parent, false);
                     stopper = new ViewStop();
-                    stopper.tvStopA2 = (TextView)convertView.findViewById(R.id.tvStopA2);
-                    stopper.tvStopTime2 = (TextView)convertView.findViewById(R.id.tvStopTime2);
+                    stopper.tvStopA2 = (TextView) convertView.findViewById(R.id.tvStopA2);
+                    stopper.tvStopTime2 = (TextView) convertView.findViewById(R.id.tvStopTime2);
                     convertView.setTag(stopper);
                 } else {
-                    stopper = (ViewStop)convertView.getTag();
+                    stopper = (ViewStop) convertView.getTag();
                 }
                 stopper.tvStopA2.setText(eAddr);
-                stopper.tvStopTime2.setText(valueOf(eTime));
+                DateFormat df1 = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+                stopper.tvStopTime2.setText(df1.format(eTime));
                 return convertView;
-
             default:
                 // unknown data type
                 throw new UnsupportedOperationException("Unknown data type");
-            }
         }
+    }
 
     static class ViewHolder {
         TextView tvNum;

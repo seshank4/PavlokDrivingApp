@@ -1,7 +1,6 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,18 +11,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.StrictMode;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebResourceRequest;
@@ -38,18 +32,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -59,6 +43,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Main Activity for the application. This is where the user will be redirected after log in
+ */
 public class MainActivity extends AppCompatActivity {
 
     private final String APP_ID = "8882d3c9f67eff55ff7b0c535d2a6ccd189d47cd7a7b42c531ad25d413baadd4";
@@ -92,18 +79,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        /*needed to perform certain low impact network operations on the main thread. Heavy operation will be performed
+        in an async task*/
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
         SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp",Context.MODE_PRIVATE);
         String acode = prefs.getString("code","");
         if(!acode.equals("")){
+            //The app is authorized to make calls to the pavlok API on behalf of the user.
             this.code = acode;
         }
+        //Initializing the location listeners
         locationManager = (LocationManager)getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener(MainActivity.this);
         vehicleSpeedLL = new myVehicleSpeedLL();
+
+        //Permissions check for GPS
         if (ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this,
@@ -119,8 +111,13 @@ public class MainActivity extends AppCompatActivity {
         boolean isFromHistory = false;
         ArrayList<Trip> userTrips = new ArrayList<>();
         if(bundle != null) {
+            /*This flag is used to prevent the main activity from calling itself over and over again after a redirect caused due
+            pavlok oauth authorization*/
             isRedirect = bundle.getBoolean("isRedirect");
+            //This flag is used to identify a navigation from the Trip History Page
             isFromHistory = bundle.getBoolean("isFromHistory");
+
+            //de-serializing the Arraylist from the bundle
             if(null != bundle.getParcelableArrayList("userTrips")) {
                 userTrips = bundle.getParcelableArrayList("userTrips");
             }
@@ -128,6 +125,8 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<Trip> tripList = userTrips;
         ListView lvMain = (ListView) findViewById(R.id.lvTrips);
         lvMain.setAdapter(new MyTripsArrayAdapter(this, userTrips));
+
+        //click listener for the list view that lists the trip history for the logged in user
         lvMain.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener(){
 
             @Override
@@ -138,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
                 if(null != trip){
                    tid = trip.getTripId();
                 }
+                //redirect to TripSummary page to show more details of the selected trip
                 Intent intent = new Intent(MainActivity.this, TripSummary.class);
                 intent.putExtra("tripId", tid);
                 startActivity(intent);
@@ -149,16 +149,28 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         if(!isFromHistory && TripHistoryTask.isAuthorized){
+            //Launching an Async Task to fetch all the Trips of the user without freezing the main thread
             TripHistoryTask.isAuthorized = false;
             TripHistoryTask tripHistoryTask = new TripHistoryTask(MainActivity.this);
             tripHistoryTask.execute();
         }
 
+        /**
+         * This code block handles the oAuth authorization for the Pavlok API. The flag makes sure that the code block executes once
+         */
         if(!isRedirect) {
             String page = "http://pavlok-mvp.herokuapp.com/oauth/authorize?client_id=" + APP_ID + "&redirect_uri=" + redirectURI + "&response_type=code";
             Uri uri = Uri.parse(page);
+            // Web view to allow the user to authorize the app to make calls to the Pavlok API on the users behalf
             WebView webView = new WebView(MainActivity.this);
             WebViewClient client = new WebViewClient() {
+                /**
+                 * This method is used as a filter to make sure that the url that contains "pavlok-bu-cs591/auth/pavlok/result"
+                 * is handled by our app and not by the webview
+                 * @param view
+                 * @param request
+                 * @return
+                 */
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                     String url = request.getUrl().toString();
@@ -170,6 +182,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
+                /**
+                 * Deprecated method override to support older devices with a older version of web view
+                 * @param view
+                 * @param url
+                 * @return
+                 */
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
@@ -199,11 +217,11 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onClick(View v) {
-                    //runtime permissions check
+                    //set visibility of the start/stop buttons
                     btn.setVisibility(View.INVISIBLE);
                     stopBtn.setVisibility(View.VISIBLE);
 
-
+                    //runtime permissions check
                     if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -212,10 +230,10 @@ public class MainActivity extends AppCompatActivity {
                     // MyLocationListener
                     else {
 
-                        // gets the gps coords every 5 seconds and when you have moved more than 1 meter
-                        // leave at 0 for testing
+                        /*gets the gps coords every 100 milli seconds to make sure that the getLastKnownLocation always returns
+                        the correct location
+                        leave at 0 for testing*/
                         Log.e("calling requestlocation", "calling requestlocation");
-//                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 0, locationListener);
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 0, vehicleSpeedLL);
                         Location sourceLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         double sourceLat = 0.0;
@@ -224,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
                             sourceLat = sourceLocation.getLatitude();
                             sourceLong = sourceLocation.getLongitude();
                         }
+                        //call the utility class function that takes in latitude and longitude and returns the complete address info
                         TomTomResponse responseObj = TomTomUtil.getTomTomResponse(sourceLat,sourceLong);
                         String startAddr = "";
                         String startSubDiv = "";
@@ -232,11 +251,14 @@ public class MainActivity extends AppCompatActivity {
                             startSubDiv = responseObj.getMunicipalitySubdivision();
                         }
                         Date startTime = Calendar.getInstance().getTime();
+                        // Database call to insert the source address information
                         int tripId =  insertSourceInfo(startAddr,startSubDiv,String.valueOf(sourceLat),String.valueOf(sourceLong),startTime);
                         setTripId(tripId);
-
                     }
                     MyLocationListener.flag = false;
+                    /*Launch an Async task that keeps checking for the vehicle speed every second and compares it with latest speed Limit
+                      from the TomTom API and sends the BEEP/VIBRATE/LED to the pabvlok device in case of infractions
+                     */
                     SpeedCheckTask task = new SpeedCheckTask(authCode,locationManager,MainActivity.this,tripId);
                     task.execute();
                 }
@@ -246,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     SpeedCheckTask.stopTrip = true;
+                    //set visibility of the start/stop buttons
                     btn.setVisibility(View.VISIBLE);
                     stopBtn.setVisibility(View.INVISIBLE);
                     if (ActivityCompat.checkSelfPermission(getApplicationContext(),
@@ -256,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                     }else {
                         if(null != locationManager && null != locationListener && null != vehicleSpeedLL) {
                             MyLocationListener.stopFlag=true;
-                            //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0, locationListener);
+                            //again get the location to be on the safe side
                             Location destLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                             double destLat = destLocation.getLatitude();
                             double destLong = destLocation.getLongitude();
@@ -270,7 +293,10 @@ public class MainActivity extends AppCompatActivity {
                             }
                             endTime = Calendar.getInstance().getTime();
                             int tripId = getTripId();
+                            //DB call to insert address information of the destination
                             insertDestInfo(destAddr,destSubDiv,String.valueOf(destLat),String.valueOf(destLong),endTime,tripId);
+
+                            //Redirect to the TripSummary Page to show a detailed view of the current trip
                             Intent intent = new Intent(MainActivity.this, TripSummary.class);
                             intent.putExtra("tripId", tripId);
                             startActivity(intent);
@@ -281,6 +307,7 @@ public class MainActivity extends AppCompatActivity {
 
             });
 
+            //Custom Navigation menu start----
             mDrawerList = (ListView) findViewById(R.id.navList);
             // Set the adapter for the list view
             String[] osArray = {"Log Out"};
@@ -320,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
             };
             mDrawerToggle.setDrawerIndicatorEnabled(true);
             mDrawerLayout.setDrawerListener(mDrawerToggle);
+        //Custom Navigation Menu end -------
 
     }
 
@@ -331,6 +359,15 @@ public class MainActivity extends AppCompatActivity {
         this.tripId = tripId;
     }
 
+    /**
+     * Inserts the source address information into the database
+     * @param startAddr
+     * @param startSubDiv
+     * @param startLat
+     * @param startLong
+     * @param startTime
+     * @return
+     */
     private int insertSourceInfo(String startAddr, String startSubDiv, String startLat, String startLong, Date startTime) {
         Statement stmt = null;
         Connection conn= null;
@@ -359,6 +396,15 @@ public class MainActivity extends AppCompatActivity {
         return tripId;
     }
 
+    /**
+     * Inserts the destination address information into the database
+     * @param destAddr
+     * @param destSubDiv
+     * @param destLat
+     * @param destLong
+     * @param destTime
+     * @param tripId
+     */
     private void insertDestInfo(String destAddr, String destSubDiv, String destLat, String destLong, Date destTime,int tripId) {
         Statement stmt = null;
         Connection conn= null;
@@ -377,6 +423,13 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Not used. Future use?
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults){
@@ -402,6 +455,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Clear the stack so that the app exits on back button press
+     */
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -418,13 +474,16 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Method that is called when the callback from the Pavlok API happens after oAuth authorization.
+     * code is extracted here from the redirect URI
+     * @param uri
+     */
     protected void handleUri(Uri uri) {
             this.code  = uri.getQueryParameter("code");
 
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
-            //intent.putExtra("startBtnVisibility",View.INVISIBLE);
             intent.putExtra("isRedirect",true);
-            //intent.putExtra("code",this.code);
             SharedPreferences prefs = this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
             if(this.code != null && !this.code.equals("")) {
                 prefs.edit().putString("code", this.code).commit();

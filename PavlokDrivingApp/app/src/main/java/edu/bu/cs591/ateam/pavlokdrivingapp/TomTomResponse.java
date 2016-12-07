@@ -1,9 +1,6 @@
 package edu.bu.cs591.ateam.pavlokdrivingapp;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import java.util.Map;
 
 /**
  * Created by sesha on 11/28/2016.
@@ -100,6 +97,5 @@ public class TomTomResponse {
     public void setFreeformAddress(String freeformAddress) {
         this.freeformAddress = freeformAddress;
     }
-
 }
 

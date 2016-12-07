@@ -3,9 +3,9 @@ package edu.bu.cs591.ateam.pavlokdrivingapp;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Date;
-
 /**
+ * Model class to store the trip information. This implements parcelable so as to enable us to send the
+ * ArrayList of Trip class though an intent
  * Created by sesha on 12/5/2016.
  */
 
@@ -34,8 +34,6 @@ public class Trip implements Parcelable {
     public void setTripStartDate(String tripStartDate) {
         this.tripStartDate = tripStartDate;
     }
-
-
 
     public String getSource() {
         return source;
@@ -66,6 +64,11 @@ public class Trip implements Parcelable {
         return 0;
     }
 
+    /**
+     * serialize
+     * @param dest
+     * @param flags
+     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(source);
@@ -78,10 +81,8 @@ public class Trip implements Parcelable {
         public Trip createFromParcel(Parcel in) {
             return new Trip(in);
         }
-
         public Trip[] newArray(int size) {
             return new Trip[size];
-
         }
     };
 }

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.sql.Connection;
@@ -15,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
+ * Async Task that performs the network operations required for verifying the user credentials
  * Created by karunesh on 11/13/2016.
  */
 public class LoginTask extends AsyncTask{
@@ -31,6 +31,7 @@ public class LoginTask extends AsyncTask{
         Connection conn = null;
         try {
             int count=0;
+            //Initialize driver and connection
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306","ateam","theateam");
             Statement stmt = conn.createStatement();
@@ -39,21 +40,21 @@ public class LoginTask extends AsyncTask{
                 count = rs.getInt(1);
             }
             if(count==1) {
+                //Count 1 means that the user is successfully authorized and will be logged in to the App
                 login = true;
                 Statement stmt1 = conn.createStatement();
                 ResultSet rs1 = stmt1.executeQuery("SELECT user_id from pavlokdb.users where EMAIL = '"+params[0]+"' AND PASSWORD = '"+params[1]+"'");
                 SharedPreferences prefs = this.activity.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
                 if(rs1.next()) {
                     prefs.edit().putInt("userId", rs1.getInt(1)).commit();
-
                 }
-
+                //required for logging in the user automatically if he/she closes the app without logging out
                 prefs.edit().putString("username", params[0].toString()).commit();
                 prefs.edit().putString("password", params[1].toString()).commit();
                 conn.close();
-                //MainActivity.userId =  rs1.getInt("user_id");
             }
             else {
+                //User credentials do not match
                 login = false;
                 conn.close();
             }
@@ -68,13 +69,14 @@ public class LoginTask extends AsyncTask{
     @Override
     protected void onPostExecute(Object o) {
         if(login){
+            //redirect to home page if login is successful
             Intent intent = new Intent(this.activity,MainActivity.class);
             activity.startActivity(intent);
         }
         else{
+            //User being notified of a failed login attempt
             Toast toast = Toast.makeText(this.activity,"Invalid credentials. Please try again.",Toast.LENGTH_LONG);
             toast.show();
         }
     }
-
 }

@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * Async task to perform Activities that require network operations for interaction with the Pavlok API
  * Created by Ganesh on 10/25/2016.
  */
 public class PavlokConnection extends AsyncTask {
@@ -36,6 +37,11 @@ public class PavlokConnection extends AsyncTask {
         return null;
     }
 
+    /**
+     * This function get the token from the api by sending the code received after ouath
+     * @param code
+     * @return
+     */
     private String authorizeAndGetToken(String code) {
         URL url = null;
         try {
@@ -43,11 +49,8 @@ public class PavlokConnection extends AsyncTask {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
         HttpURLConnection connection = null;
-
         connection = getHttpURLConnection(url, connection);
-
         JSONObject obj = new JSONObject();
         try {
             obj.put("client_id", "8882d3c9f67eff55ff7b0c535d2a6ccd189d47cd7a7b42c531ad25d413baadd4");
@@ -67,8 +70,9 @@ public class PavlokConnection extends AsyncTask {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
+        /**
+         * Jackson Object mapper that directly maps the response to a model class. This class will be used by our app.
+         */
         ObjectMapper mapper = new ObjectMapper();
         Authorized responseObj = null;
         try {
@@ -84,6 +88,12 @@ public class PavlokConnection extends AsyncTask {
         return "";
     }
 
+    /**
+     * Function to get a connection. Refractored this to new method to avoid code repetition
+     * @param url
+     * @param connection
+     * @return
+     */
     @NonNull
     private HttpURLConnection getHttpURLConnection(URL url, HttpURLConnection connection) {
         try {
@@ -91,9 +101,7 @@ public class PavlokConnection extends AsyncTask {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         connection.setRequestProperty("Content-Type", "application/json");
-
         connection.setDoInput(true);
         connection.setDoOutput(true);
         try {
@@ -104,14 +112,18 @@ public class PavlokConnection extends AsyncTask {
         return connection;
     }
 
+    /**
+     * Generic method that does an "Action" which could be "Vibrate/Beep/LED Flas" based on input parameters and desired intensity
+     * @param access_token
+     * @param action
+     * @param intensity
+     * @throws IOException
+     */
     public void doAction(String access_token, String action, int intensity) throws IOException {
 
         URL url = new URL("http://pavlok-mvp.herokuapp.com/api/v1/stimuli/"+action+"/"+intensity);
-
         HttpURLConnection connection = null;
-
         connection = getHttpURLConnection(url, connection);
-
         JSONObject obj = new JSONObject();
         try {
             obj.put("access_token", access_token);
@@ -120,15 +132,11 @@ public class PavlokConnection extends AsyncTask {
         }
         DataOutputStream printout = null;
         DataInputStream input;
-
         try {
             printout = new DataOutputStream(connection.getOutputStream());
             printout.write(obj.toString().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        System.out.println(connection.getResponseCode());
-
     }
 }

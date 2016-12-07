@@ -8,7 +8,6 @@ import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -22,8 +21,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.Calendar;
+import java.util.Date;
 
 
 /**
@@ -47,18 +46,12 @@ public class MyLocationListener implements LocationListener {
 
     @Override
     public void onLocationChanged(Location loc) {
-        //Toast.makeText(this.context, "In onLocationChanged", Toast.LENGTH_SHORT).show();
-
-
         String longitude = "Longitude: " +loc.getLongitude();
         Log.e("in MyLocationListener", longitude);
         String latitude = "Latitude: " +loc.getLatitude();
         Log.e("in MyLocationListener", latitude);
-
         String speedLimit  = getSpeedLimitFromTomTom(loc.getLatitude()+"", loc.getLongitude()+"");
-
         String speedL = speedLimit.substring(0,speedLimit.indexOf("."));
-//        SpeedCheckTask.speedLimit = Integer.parseInt(speedL);
     }
 
     protected String getSpeedLimitFromTomTom(final String latitude, final String longitude){
@@ -68,7 +61,6 @@ public class MyLocationListener implements LocationListener {
         //StrictMode stuff has to be here because there was an error being thrown.
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
         // Creating the URL object to pass to the HTTP request function
         // must put in try catch since url may be invalid
         URL url = null;
@@ -77,14 +69,7 @@ public class MyLocationListener implements LocationListener {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
         Log.e("in SpeedCheckTask.get",url.toString());
-//        Toast.makeText(context, "lat and long are" + longitude + "," + latitude, Toast.LENGTH_SHORT).show();
-
-        /*//sb variable is for testing
-        StringBuilder sb = new StringBuilder();
-        //pass url and sb to getHTTPConnection
-        sb = getHttpURLConnection(url,sb);*/
         HttpURLConnection connection;
         TomTomResponse responseObj = null;
         try {
@@ -93,22 +78,17 @@ public class MyLocationListener implements LocationListener {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 System.out.println(connection.getResponseCode());
-                //responseObj = mapper.readValue(connection.getInputStream(), TomTomResponse.class);
                 JsonNode node  = mapper.readTree(connection.getInputStream());
                 JsonNode subNode = node.get("addresses").get(0).get("address");
                 responseObj = mapper.readValue(subNode,TomTomResponse.class);
-               // subNode.get("address")
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
             String startAddr = "";
             String startSubDiv = "";
             String startLat = "";
             String startLong = "";
             Date startTime = null;
-
             String destAddr = "";
             String destSubDiv = "";
             String destLat = "";
@@ -122,12 +102,9 @@ public class MyLocationListener implements LocationListener {
                 startLong = longitude;
                 startTime = Calendar.getInstance().getTime();
                 int tripId =  insertSourceInfo(startAddr,startSubDiv,startLat,startLong,startTime);
-
                 flag = true;
-
                 SharedPreferences prefs = this.activity.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
                 prefs.edit().putInt("tripId",tripId).commit();
-
             }
 
             if(stopFlag){
@@ -139,22 +116,9 @@ public class MyLocationListener implements LocationListener {
                 insertDestInfo(destAddr,destSubDiv,destLat,destLong,endTime);
                 stopFlag = false;
             }
-
-            /*if(connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-
-                BufferedReader reader =
-                        new BufferedReader(new InputStreamReader((InputStream) connection.getContent()), 65728);
-                String line = null;
-
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            }*/
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Log.e("printing tomtom", String.valueOf(sb));
         return responseObj.getSpeedLimit();
     }
 
@@ -171,9 +135,7 @@ public class MyLocationListener implements LocationListener {
             stmt = conn.createStatement();
             conn.setAutoCommit(false);
             stmt.executeUpdate("update pavlokdb.trip_summary set destination_addr='"+destAddr+"',dest_subdiv='"+destSubDiv+"',dest_lat='"+destLat+"',dest_long='"+destLong+"' where trip_id = "+destTripId);
-
             conn.commit();
-
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -201,7 +163,6 @@ public class MyLocationListener implements LocationListener {
                 tripId = rs.getInt(1);
             }
             conn.commit();
-
         } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 } catch (SQLException e) {
