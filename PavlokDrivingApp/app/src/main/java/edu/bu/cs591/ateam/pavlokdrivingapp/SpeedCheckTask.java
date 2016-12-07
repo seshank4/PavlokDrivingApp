@@ -65,11 +65,14 @@ public class SpeedCheckTask extends AsyncTask {
         }else {
             //Keep the thread alive until the stop trip button is clicked by the user
             routeTrace = new ArrayList<>();
+            SpeedCheckTask.stopTrip = false;
             while (!stopTrip) {
                 //get updated location
                 Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 //add the current coordinates to the route list
-                routeTrace.add(loc);
+                if(routeTrace != null) {
+                    routeTrace.add(loc);
+                }
                 TomTomResponse responseObj = null;
                 if(loc != null) {
                     //get the speed of the vehicle from the Location Manager which user the GPS to calculate the speed
@@ -77,6 +80,7 @@ public class SpeedCheckTask extends AsyncTask {
                     vehicleSpeed = loc.getSpeed();
                     //convert meters per second to miles per hour
                     vehicleSpeed = vehicleSpeed / 0.44704;
+                    //vehicleSpeed = 35.0;
                     //Call the TomTom Api to get the SpeedLimit
                     responseObj = TomTomUtil.getTomTomResponse(loc.getLatitude(),loc.getLongitude());
                 }
@@ -93,6 +97,7 @@ public class SpeedCheckTask extends AsyncTask {
                     //set speed limit to 20 if the road does not have a speed limit
                     speedLimit=20;
                 }
+                //speedLimit = 40;
                 if (isSpeedIllegal(vehicleSpeed)) {
                     //perform a beep+vibrate+led flash in case of infraction
                     doBeep();
