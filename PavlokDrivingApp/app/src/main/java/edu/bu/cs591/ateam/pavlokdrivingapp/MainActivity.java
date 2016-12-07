@@ -319,6 +319,11 @@ public class MainActivity extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(MainActivity.this, "Logged Out", Toast.LENGTH_SHORT).show();
                     if (((TextView) view).getText().toString().equals("Log Out")) {
+                        SharedPreferences prefs = MainActivity.this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
+
+                        prefs.edit().putString("username", "-1").commit();
+                        prefs.edit().putString("password", "-1").commit();
+
                         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // clear back stack
                         startActivity(intent);
