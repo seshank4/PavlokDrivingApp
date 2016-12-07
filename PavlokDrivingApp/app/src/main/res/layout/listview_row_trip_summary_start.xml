@@ -7,13 +7,13 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="5">
 
         <TextView
             android:text="Start Point"
             android:layout_width="64dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/tvSumStart"
             tools:text="Start Point"
             android:textSize="18sp"

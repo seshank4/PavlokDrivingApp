@@ -43,8 +43,13 @@ import java.util.Date;
 import static java.lang.String.valueOf;
 
 /**
- * various pieces of code taken from previous homework assignments,
- * including gotoLocation(), MyLocationListener()
+ *  TripSummary.java displays either the trip just ended or the trip selected from history.
+ *
+ *  It creates a map fragment with color coded markers on it.  Green for the starting point,
+ *  red for the ending point, and orange for any speeding violations.
+ *
+ *  Below the map is a ListView that follows the same color scheme, displaying the markers
+ *  and their information in chronological order
  */
 
 public class TripSummary extends AppCompatActivity implements OnMapReadyCallback {
@@ -101,7 +106,11 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // Load the infractions array with the data from the selected trip
         populateInfractions(tripId);
+
+        // Trace a line along the route driven
         routeLocList = SpeedCheckTask.routeTrace;
         SpeedCheckTask.routeTrace = null;
         if (routeLocList != null && routeLocList.size() > 0) {
@@ -123,6 +132,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
+
 
     /**
      * DB call to get the coordinate trace of the entire route for the current Trip.
@@ -176,6 +186,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
+
     /**
      * Get source and destination Location information from the Database
      * @param tripId
@@ -203,7 +214,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
                 // Set start & end points
                 start = new LatLng(sourceLat, sourceLong);
                 end = new LatLng(destLat, destLong);
-                // FIND CENTER POINT
+                // Find center point of map fragment
                 cLat = (sourceLat + destLat) / 2;
                 cLong = (sourceLong + destLong) / 2;
                 CENTER = new LatLng(cLat, cLong);
@@ -222,11 +233,11 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(MYTAG, "onResume Called, Requesting Location Updates");
+        Log.i(MYTAG, "onResume Called");
     }
 
 
-    /**
+    /*
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * If Google Play services is not installed on the device, the user will be prompted to install
@@ -295,7 +306,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 }
 
 
-// Custom Adapter for displaying trip summary information by infraction #
+// Custom Adapter for displaying trip summary information by infraction number
 class MyCustomTripAdapter extends BaseAdapter {
     private static ArrayList<ArrayList<Double>> infractions;
     private LayoutInflater mInflater;
@@ -314,6 +325,10 @@ class MyCustomTripAdapter extends BaseAdapter {
         mInflater = LayoutInflater.from(context);
     }
 
+    /**
+     *  Must override getViewTypeCount() & getItemViewType() to implement multiple
+     *  listViews in the listAdapter
+     */
     @Override
     public int getViewTypeCount() {
         return 3;
