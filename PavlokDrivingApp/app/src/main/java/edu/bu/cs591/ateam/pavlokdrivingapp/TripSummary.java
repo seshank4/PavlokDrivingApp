@@ -90,6 +90,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         Bundle bundle = getIntent().getExtras();
+        SpeedCheckTask.stopTrip = false;
         int tripId = 0;
         if (bundle != null) {
             tripId = bundle.getInt("tripId");

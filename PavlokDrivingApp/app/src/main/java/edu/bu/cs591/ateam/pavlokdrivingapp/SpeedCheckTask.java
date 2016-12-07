@@ -64,6 +64,7 @@ public class SpeedCheckTask extends AsyncTask {
 
         }else {
             //Keep the thread alive until the stop trip button is clicked by the user
+            routeTrace = new ArrayList<>();
             while (!stopTrip) {
                 //get updated location
                 Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
