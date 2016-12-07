@@ -49,8 +49,13 @@ import java.util.List;
 import static java.lang.String.valueOf;
 
 /**
- *  various pieces of code taken from previous homework assignments,
- *  including gotoLocation(), MyLocationListener()
+ *  TripSummary.java displays either the trip just ended or the trip selected from history.
+ *
+ *  It creates a map fragment with color coded markers on it.  Green for the starting point,
+ *  red for the ending point, and orange for any speeding violations.
+ *
+ *  Below the map is a ListView that follows the same color scheme, displaying the markers
+ *  and their information in chronological order
  */
 
 public class TripSummary extends AppCompatActivity implements OnMapReadyCallback {
@@ -109,8 +114,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
+        // Load the infractions array with the data from the selected trip
         populateInfractions(tripId);
 
+        // Trace a line along the route driven
         routeLocList = SpeedCheckTask.routeTrace;
         SpeedCheckTask.routeTrace = null;
         if(routeLocList!=null && routeLocList.size()>0){
@@ -136,6 +143,9 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    /* Call the database and return an ArrayList of all the (lat, long) pairs for this trip
+     * to trace a line highlighting the route driven
+     */
     private void getRouteTrace(int tripId) {
         Connection conn = null;
         try {
@@ -155,6 +165,9 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
+    /*  Call the database and return a nested ArrayList, containing the information associated
+        with each speeding infraction:  (lat, long, speed limit, vehicle speed)
+     */
     private void populateInfractions(int tripId) {
 
         Connection conn = null;
@@ -184,6 +197,10 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 
     }
 
+    /*  Call the database and return the gps information for the starting and ending points
+        of the trip.
+        Using the start & end coords, calculate the center point of the map fragment
+     */
     private void getSourceDestLoc(int tripId) throws SQLException {
         Connection conn = null;
         try {
@@ -229,11 +246,11 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(MYTAG, "onResume Called, Requesting Location Updates");
+        Log.i(MYTAG, "onResume Called");
     }
 
 
-    /**
+    /*
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * If Google Play services is not installed on the device, the user will be prompted to install
@@ -305,7 +322,7 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
 }
 
 
-// Custom Adapter for displaying trip summary information by infraction #
+// Custom Adapter for displaying trip summary information by infraction number
 class MyCustomTripAdapter extends BaseAdapter {
     private static ArrayList<ArrayList<Double>> infractions;
     private LayoutInflater mInflater;
@@ -324,6 +341,10 @@ class MyCustomTripAdapter extends BaseAdapter {
         mInflater = LayoutInflater.from(context);
     }
 
+    /*
+     *  Must override getViewTypeCount() & getItemViewType() to implement multiple
+     *  listViews in the listAdapter
+     */
     @Override
     public int getViewTypeCount() {
         return 3;
