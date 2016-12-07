@@ -22,13 +22,18 @@ public class RouteInsertTask extends AsyncTask {
         if(routeLocList!=null){
             Statement stmt = null;
             Connection conn = null;
+            int count = 0;
             try {
                 Class.forName("com.mysql.jdbc.Driver");
                 conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306", "ateam", "theateam");
                 stmt = conn.createStatement();
                 conn.setAutoCommit(false);
                 for(Location loc : routeLocList) {
+                    if(count%2!=0){
+                        continue;
+                    }
                     stmt.executeUpdate("INSERT INTO pavlokdb.trip_route(trip_id,lat,lon) VALUES('" + tripId + "','" + loc.getLatitude() + "','" + loc.getLongitude() + "')");
+                    count++;
                 }
                 conn.commit();
                 conn.close();
