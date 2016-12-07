@@ -63,7 +63,7 @@
                 android:id="@+id/tvSpeed1"
                 android:textStyle="normal|bold"
                 android:layout_weight="1"
-                tools:text="Your Speed:  " />
+                android:textSize="14sp" />
 
             <TextView
                 android:text="tvSpeed2"
