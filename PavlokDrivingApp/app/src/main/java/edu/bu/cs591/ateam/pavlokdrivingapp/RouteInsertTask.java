@@ -29,10 +29,9 @@ public class RouteInsertTask extends AsyncTask {
                 stmt = conn.createStatement();
                 conn.setAutoCommit(false);
                 for(Location loc : routeLocList) {
-                    if(count%2!=0){
-                        continue;
+                    if(count%2==0){
+                        stmt.executeUpdate("INSERT INTO pavlokdb.trip_route(trip_id,lat,lon) VALUES('" + tripId + "','" + loc.getLatitude() + "','" + loc.getLongitude() + "')");
                     }
-                    stmt.executeUpdate("INSERT INTO pavlokdb.trip_route(trip_id,lat,lon) VALUES('" + tripId + "','" + loc.getLatitude() + "','" + loc.getLongitude() + "')");
                     count++;
                 }
                 conn.commit();
