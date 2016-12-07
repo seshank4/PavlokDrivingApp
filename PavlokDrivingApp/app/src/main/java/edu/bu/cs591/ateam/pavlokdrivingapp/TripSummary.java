@@ -41,6 +41,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -195,8 +197,8 @@ public class TripSummary extends AppCompatActivity implements OnMapReadyCallback
             if (rs.next()) {
 
 
-                tripStartTime = rs.getDate("trip_start_dt");
-                tripEndTime = rs.getDate("trip_end_dt");
+                tripStartTime = new Date(rs.getTimestamp("trip_start_dt").getTime());
+                tripEndTime = new Date(rs.getTimestamp("trip_end_dt").getTime());
                 sourceAddr = rs.getString("source_addr");
                 destAddr = rs.getString("destination_addr");
                 sourceSubDiv = rs.getString("source_subdiv");
@@ -373,7 +375,8 @@ class MyCustomTripAdapter extends BaseAdapter {
                     starter = (ViewStart)convertView.getTag();
                 }
                 starter.tvStartA2.setText(sAddr);
-                starter.tvStartTime2.setText(valueOf(sTime));
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+                starter.tvStartTime2.setText(df.format(sTime));
                 return convertView;
 
             /*
@@ -413,7 +416,8 @@ class MyCustomTripAdapter extends BaseAdapter {
                     stopper = (ViewStop)convertView.getTag();
                 }
                 stopper.tvStopA2.setText(eAddr);
-                stopper.tvStopTime2.setText(valueOf(eTime));
+                DateFormat df1 = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+                stopper.tvStopTime2.setText(df1.format(eTime));
                 return convertView;
 
             default:
