@@ -35,7 +35,7 @@ public class LoginTask extends AsyncTask{
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://pavlokdb.cwxhunrrsqfb.us-east-2.rds.amazonaws.com:3306","ateam","theateam");
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM pavlokdb.users WHERE EMAIL = '"+params[0]+"' AND PASSWORD = '"+params[1]+"'");
+            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM pavlokdb.users WHERE EMAIL = '"+params[0]+"' AND cast(AES_DECRYPT(password,'pavlok') as char(50)) = '"+params[1]+"'");
             if(rs.next()){
                 count = rs.getInt(1);
             }
@@ -43,7 +43,7 @@ public class LoginTask extends AsyncTask{
                 //Count 1 means that the user is successfully authorized and will be logged in to the App
                 login = true;
                 Statement stmt1 = conn.createStatement();
-                ResultSet rs1 = stmt1.executeQuery("SELECT user_id from pavlokdb.users where EMAIL = '"+params[0]+"' AND PASSWORD = '"+params[1]+"'");
+                ResultSet rs1 = stmt1.executeQuery("SELECT user_id from pavlokdb.users where EMAIL = '"+params[0]+"' AND cast(AES_DECRYPT(password,'pavlok') as char(50)) = '"+params[1]+"'");
                 SharedPreferences prefs = this.activity.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
                 if(rs1.next()) {
                     prefs.edit().putInt("userId", rs1.getInt(1)).commit();
