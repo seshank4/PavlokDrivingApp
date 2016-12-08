@@ -65,14 +65,9 @@ public class MainActivity extends AppCompatActivity {
     private String EXT = "json/"; // the extension of the response. (json, jsonp, js, or xml)
     private String API_KEY = "h8fxx4ptxbtb4y7xv5r9x7ga";
     private GoogleApiClient mGoogleApiClient;
-
-
-    //Tomtom
     private LocationManager locationManager;
     private LocationListener locationListener = null;
     private LocationListener vehicleSpeedLL = null;
-
-    private Button btnTomTom;
     private int tripId;
 
     @Override
@@ -310,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
             //Custom Navigation menu start----
             mDrawerList = (ListView) findViewById(R.id.navList);
             // Set the adapter for the list view
-            String[] osArray = {"Log Out"};
+            String[] osArray = {getString(R.string.log_out)};
             mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
             mDrawerList.setAdapter(mAdapter);
             // Set the list's click listener
@@ -318,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(MainActivity.this, "Logged Out", Toast.LENGTH_SHORT).show();
-                    if (((TextView) view).getText().toString().equals("Log Out")) {
+                    if (((TextView) view).getText().toString().equals(getResources().getString(R.string.log_out))) {
                         SharedPreferences prefs = MainActivity.this.getSharedPreferences("edu.bu.cs591.ateam.pavlokdrivingapp", Context.MODE_PRIVATE);
 
                         prefs.edit().putString("username", "-1").commit();
@@ -337,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
                  */
                 public void onDrawerOpened(View drawerView) {
                     super.onDrawerOpened(drawerView);
-                    getSupportActionBar().setTitle("Navigation!");
+                    getSupportActionBar().setTitle(R.string.navigation);
                     invalidateOptionsMenu();
                 }
 

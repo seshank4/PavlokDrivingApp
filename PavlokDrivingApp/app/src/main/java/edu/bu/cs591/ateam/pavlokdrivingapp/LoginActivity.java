@@ -40,7 +40,8 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = (Button) findViewById(R.id.Blogin);
         Button registerBtn = (Button) findViewById(R.id.signUpBtn);
 
-        //-1 means that the user has to login again
+        //-1 means that the user has to login again, since it is the default return valued
+        // for the shared prefs.
         if (loggedInUserName != "-1" || loggedInUserPassword != "-1"){
             mainActivityIntent = new Intent(this,MainActivity.class);
             startActivity(mainActivityIntent);

@@ -11,7 +11,7 @@
         android:layout_weight="5">
 
         <TextView
-            android:text="Start Point"
+            android:text="@string/start_point"
             android:layout_width="64dp"
             android:layout_height="match_parent"
             android:id="@+id/tvSumStart"
@@ -37,7 +37,7 @@
             android:layout_weight="5">
 
             <TextView
-                android:text="Nearest Address:"
+                android:text="@string/nearest_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvStartAddr"
@@ -60,7 +60,7 @@
             android:layout_weight="5">
 
             <TextView
-                android:text="Starting Time:"
+                android:text="@string/starting_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvStartTime1"

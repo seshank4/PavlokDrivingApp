@@ -11,20 +11,20 @@
         android:layout_width="match_parent"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:hint="First Name"
+        android:hint="@string/first_name"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/etLastName"
         android:layout_width="match_parent"
         android:layout_marginBottom="10dp"
-        android:hint="Last Name"
+        android:hint="@string/last_name"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="match_parent"
-        android:hint="Email"
+        android:hint="@string/email"
         android:layout_marginBottom="10dp"
         android:layout_height="wrap_content" />
 
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content" />
     <Button
         android:id="@+id/registerBtn"
-        android:text="REGISTER"
+        android:text="@string/register"
         android:onClick="onSignUpClick"
         android:background="@drawable/button"
         android:layout_width="match_parent"

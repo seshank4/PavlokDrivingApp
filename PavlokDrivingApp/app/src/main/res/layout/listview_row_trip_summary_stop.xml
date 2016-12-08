@@ -11,7 +11,7 @@
         android:layout_weight="5">
 
         <TextView
-            android:text="End Point"
+            android:text="@string/end_point"
             android:layout_width="64dp"
             android:layout_height="match_parent"
             android:id="@+id/tvSumStop"
@@ -37,7 +37,7 @@
             android:layout_weight="5">
 
             <TextView
-                android:text="Nearest Address:"
+                android:text="@string/nearest_address_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvStopAddr"
@@ -60,7 +60,7 @@
             android:layout_weight="5">
 
             <TextView
-                android:text="Time Ended:"
+                android:text="@string/time_ended"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvStopTime1"

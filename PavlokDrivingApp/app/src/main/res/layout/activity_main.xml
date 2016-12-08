@@ -70,7 +70,7 @@
         </RelativeLayout>
 
         <TextView
-            android:text="Your Trip History "
+            android:text="@string/your_trip_history"
             android:layout_width="match_parent"
             android:layout_height="53dp"
             android:id="@+id/textView"
