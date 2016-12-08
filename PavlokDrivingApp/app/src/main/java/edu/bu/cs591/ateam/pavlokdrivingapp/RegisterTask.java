@@ -49,7 +49,7 @@ public class RegisterTask extends AsyncTask {
                 // new user so insert a record to database
                 try {
                     stmt = conn.createStatement();
-                    count = stmt.executeUpdate("INSERT INTO pavlokdb.users(first_name,last_name,email,password) VALUES('" + firstName + "','" + lastName + "','" + email + "','" + password + "')");
+                    count = stmt.executeUpdate("INSERT INTO pavlokdb.users(first_name,last_name,email,password) VALUES('" + firstName + "','" + lastName + "','" + email + "',aes_encrypt('" + password + "','pavlok'))");
 
                 } catch (SQLException e) {
                     e.printStackTrace();
